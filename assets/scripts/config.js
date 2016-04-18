@@ -20,3 +20,5 @@ var spreadsheetIDs = [
         sessionName: 'Ułęż Rallysprint'
     }
 ];
+
+var spreadsheetID = "14czTfhE5YJrPSVlYk5huK1S6PKFJOtI4WeW_1H3TOC0"; // tylko identyfikator do dokumentu na google docs, z linku przy opcji udosteniania - do usuniecia w nowszej wersji

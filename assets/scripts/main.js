@@ -100,9 +100,6 @@ require(['jquery', 'config'], function ($) {
         };
 
         /* tworzymy obiekt dla zawodow */
-
-        var spreadsheetID = "14czTfhE5YJrPSVlYk5huK1S6PKFJOtI4WeW_1H3TOC0"; // tylko identyfikator do dokumentu na google docs, z linku przy opcji udosteniania
-
         var ulez = new Spreadsheet(spreadsheetID);
 
         setInterval(function(){
