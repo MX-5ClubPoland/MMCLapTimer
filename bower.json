@@ -1,0 +1,22 @@
+{
+  "name": "MMCLapTimer",
+  "homepage": "https://github.com/MX-5ClubPoland/MMCLapTimer",
+  "authors": [
+    "Jarri",
+    "Nickesh"
+  ],
+  "description": "",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "^2.2.0",
+    "jquery": "^2.2.3"
+  }
+}
