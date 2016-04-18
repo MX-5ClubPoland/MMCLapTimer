@@ -1,15 +1,16 @@
-require(['jquery'], function ($) {
-    
+require(['jquery', 'config'], function ($) {
+
     $(document).ready(function(){
 
         function Spreadsheet(spreadsheetID) {
             this.spreadsheetID = spreadsheetID;
+            this.runs = 8; // maskymalna ilość kółek pomiarowych - ilosc kolumn 'Pomiar'
+            this.results = new Array();
             this.init();
         }
 
         Spreadsheet.prototype.init = function(){
-            this.runs = 8; // maskymalna ilość kółek pomiarowych
-
+            this.refreshData();
         };
 
         /* pobranie jsona z google docs - surowy */
@@ -58,6 +59,7 @@ require(['jquery'], function ($) {
                 return times;
             };
 
+            /* generujemy docelowy JSON */
             this.generateJson = function () {
                 var _res = new Array(),
                     _this = this;
@@ -79,17 +81,32 @@ require(['jquery'], function ($) {
             return this.generateJson();
         };
 
-        /* tworzymy obiekt dla sesji treningowej lub rallysprint */
+        /* metoda do pobierania nowych danych z api */
+        Spreadsheet.prototype.refreshData = function () {
+            var _this = this;
+
+            _this.getJSON().done(function (data) {
+                _this.results = _this.normalize(data);
+                _this.refreshView();
+            });
+        };
+
+        /* metoda do odsiwezania widoku */
+        Spreadsheet.prototype.refreshView = function () {
+            $('body').addClass('ready'); // dodaje do body klase, po to, aby dopiero wyswietlic strone po zaladowaniu rezultatow - preloader
+
+            /* miejsce na czary zwiazane z renderem widoku */
+            console.log(this.results);
+        };
+
+        /* tworzymy obiekt dla zawodow */
 
         var spreadsheetID = "14czTfhE5YJrPSVlYk5huK1S6PKFJOtI4WeW_1H3TOC0"; // tylko identyfikator do dokumentu na google docs, z linku przy opcji udosteniania
 
-        var rallysprint = new Spreadsheet(spreadsheetID);
+        var ulez = new Spreadsheet(spreadsheetID);
 
-        rallysprint.getJSON().done(function (data) {
-
-            var results = rallysprint.normalize(data);
-            console.log(results);
-
-        });
+        setInterval(function(){
+            ulez.refreshData();
+        }, interval * 1000);
     });
 });
