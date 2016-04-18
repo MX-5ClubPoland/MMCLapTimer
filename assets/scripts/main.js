@@ -2,21 +2,29 @@ require(['jquery', 'config'], function ($) {
 
     $(document).ready(function(){
 
-        function Spreadsheet(spreadsheetID) {
-            this.spreadsheetID = spreadsheetID;
-            this.runs = 8; // maskymalna ilość kółek pomiarowych - ilosc kolumn 'Pomiar'
+        function Spreadsheet() {
+            this.configSheet = config.configSheet;
+            this.config = {};
             this.results = new Array();
+            this.resultsPractice = new Array();
             this.init();
         }
 
         Spreadsheet.prototype.init = function(){
-            this.refreshData();
+            var _this = this;
+
+            /* pobieranie konfigu */
+            _this.getJSON(this.configSheet).done(function (data) {
+                _this.config = _this.normalizeConfig(data);
+
+                _this.refreshData();
+            });
         };
 
         /* pobranie jsona z google docs - surowy */
-        Spreadsheet.prototype.getJSON = function () {
+        Spreadsheet.prototype.getJSON = function (sheetToken) {
 
-            var url = "https://spreadsheets.google.com/feeds/list/" + this.spreadsheetID + "/od6/public/values?alt=json";
+            var url = "https://spreadsheets.google.com/feeds/list/" + sheetToken + "/od6/public/values?alt=json";
             var dff = $.Deferred();
 
             var ajaxPromise = $.ajax(
@@ -36,8 +44,38 @@ require(['jquery', 'config'], function ($) {
             return dff.promise();
         };
 
+        /* pobieranie arkusza konfiguracji */
+        Spreadsheet.prototype.refreshConfig = function (data) {
+            var _this = this;
+
+            _this.getJSON(_this.configSheet).done(function (data) {
+
+                _this.config = _this.normalizeConfig(data);
+
+                console.log(_this.config);
+            });
+        };
+
+        /* normalizacja konfiguracji */
+        Spreadsheet.prototype.normalizeConfig = function (json) {
+
+            var _config = {
+                sheetRace: json[0].gsx$sheetrace.$t,
+                sheetPractice: [],
+                lapsPractice: json[0].gsx$lapspractice.$t,
+                lapsRace: json[0].gsx$lapsrace.$t,
+                lapsRaceCount: json[0].gsx$lapsracecount.$t
+            };
+
+            $(json).each(function () {
+                _config.sheetPractice.push(this.gsx$sheetpractice.$t);
+            });
+
+            return _config;
+        };
+
         /* normalizacja surowego jsona do czytelnego formatu */
-        Spreadsheet.prototype.normalize = function (json) {
+        Spreadsheet.prototype.normalizeResults = function (json) {
 
             /* wyciaga z jsona czasy kolek i tworzy oddzielna tablice */
             this.getTimes = function (object) {
@@ -45,7 +83,7 @@ require(['jquery', 'config'], function ($) {
                 var times = new Array();
 
                 /* po kolei kazde kolko z limitem prob ustalonym na konstruktorze this.runs */
-                for (i = 0; i < this.runs; i++) {
+                for (i = 0; i < this.config.lapsPractice; i++) {
                     var j = i + 1,
                         time = eval('object.gsx$pomiar' + j).$t.trim();
 
@@ -85,10 +123,12 @@ require(['jquery', 'config'], function ($) {
         Spreadsheet.prototype.refreshData = function () {
             var _this = this;
 
-            _this.getJSON().done(function (data) {
-                _this.results = _this.normalize(data);
+            _this.getJSON(_this.config.sheetPractice[0]).done(function (data) {
+                _this.results = _this.normalizeResults(data);
                 _this.refreshView();
             });
+
+
         };
 
         /* metoda do odsiwezania widoku */
@@ -100,10 +140,17 @@ require(['jquery', 'config'], function ($) {
         };
 
         /* tworzymy obiekt dla zawodow */
-        var ulez = new Spreadsheet(spreadsheetID);
+        var ulez = new Spreadsheet();
 
+        /* odsiwiezenie rezultatow */
         setInterval(function(){
             ulez.refreshData();
-        }, interval * 1000);
+
+        }, config.refreshTimes.results * 1000);
+
+        /* odswiezenie konfiguracji */
+        setInterval(function () {
+            ulez.refreshConfig();
+        }, config.refreshTimes.config * config.refreshTimes.results * 1000)
     });
 });
