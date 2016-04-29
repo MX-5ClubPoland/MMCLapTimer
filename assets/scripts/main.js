@@ -11,12 +11,12 @@ require(['jquery', 'config'], function ($) {
             this.init();
         }
 
-        Spreadsheet.prototype.init = function(){
+        Spreadsheet.prototype.init = function () {
             var _this = this;
 
-            _this.refreshConfig();
+            this.refreshConfig();
 
-            setInterval(function () {
+            setInterval(function configInterval() {
                 _this.dirtyCheck(_this.configSheet, _this.timestamps).done(function dirtyCheckCb(isChanged) {
                     if (isChanged) {
                         _this.refreshConfig();
@@ -24,7 +24,7 @@ require(['jquery', 'config'], function ($) {
                 });
             }, config.refreshTimes.config * config.refreshTimes.results * 1000);
 
-            setInterval(function(){
+            setInterval(function dataInterval() {
                 _this.dirtyCheck(_this.config.sheetPractice[0], _this.timestamps).done(function dirtyCheckCb(isChanged) {
                     if (isChanged) {
                         _this.refreshData();
@@ -44,13 +44,13 @@ require(['jquery', 'config'], function ($) {
                 type : 'HEAD'
             });
 
-            ajaxPromise.then(function (data, textStatus, request) {
+            ajaxPromise.then(function onSuccess(data, textStatus, request) {
                 if(typeof _this.timestamps[sheetToken] === 'undefined' || _this.timestamps[sheetToken] < request.getResponseHeader('last-modified')) {
                     dff.resolve(true);
                 } else {
                     dff.resolve(false);
                 }
-            }, function (error) {
+            }, function onError(error) {
                 dff.reject(error);
             });
 
