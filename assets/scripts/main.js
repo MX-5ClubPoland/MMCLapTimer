@@ -3,6 +3,7 @@ require(['jquery', 'config'], function ($) {
     $(document).ready(function(){
 
         function Spreadsheet() {
+            this.timestamps = {};
             this.configSheet = config.configSheet;
             this.config = {};
             this.results = new Array();
@@ -10,20 +11,55 @@ require(['jquery', 'config'], function ($) {
             this.init();
         }
 
-        Spreadsheet.prototype.init = function(){
+        Spreadsheet.prototype.init = function () {
             var _this = this;
 
-            /* pobieranie konfigu */
-            _this.getJSON(this.configSheet).done(function (data) {
-                _this.config = _this.normalizeConfig(data);
+            this.refreshConfig();
 
-                _this.refreshData();
+            setInterval(function configInterval() {
+                _this.dirtyCheck(_this.configSheet, _this.timestamps).done(function dirtyCheckCb(isChanged) {
+                    if (isChanged) {
+                        _this.refreshConfig();
+                    }
+                });
+            }, config.refreshTimes.config * config.refreshTimes.results * 1000);
+
+            setInterval(function dataInterval() {
+                _this.dirtyCheck(_this.config.sheetPractice[0], _this.timestamps).done(function dirtyCheckCb(isChanged) {
+                    if (isChanged) {
+                        _this.refreshData();
+                    }
+                });
+            }, config.refreshTimes.results * 1000);
+        };
+        
+        /* Sprawdzanie czy last-modified header się zmienił */
+        Spreadsheet.prototype.dirtyCheck = function dirtyCheck(sheetToken) {
+            var _this = this;
+            var url = "https://spreadsheets.google.com/feeds/list/" + sheetToken + "/od6/public/values?alt=json";
+            var dff = $.Deferred();
+
+            var ajaxPromise = $.ajax({
+                url : url,
+                type : 'HEAD'
             });
+
+            ajaxPromise.then(function onSuccess(data, textStatus, request) {
+                if(typeof _this.timestamps[sheetToken] === 'undefined' || _this.timestamps[sheetToken] < request.getResponseHeader('last-modified')) {
+                    dff.resolve(true);
+                } else {
+                    dff.resolve(false);
+                }
+            }, function onError(error) {
+                dff.reject(error);
+            });
+
+            return dff.promise();
         };
 
         /* pobranie jsona z google docs - surowy */
         Spreadsheet.prototype.getJSON = function (sheetToken) {
-
+            var _this = this;
             var url = "https://spreadsheets.google.com/feeds/list/" + sheetToken + "/od6/public/values?alt=json";
             var dff = $.Deferred();
 
@@ -33,8 +69,8 @@ require(['jquery', 'config'], function ($) {
                 }
             );
 
-            ajaxPromise.then(function (data) {
-
+            ajaxPromise.then(function (data, textStatus, request) {
+                _this.timestamps[sheetToken] = request.getResponseHeader('last-modified');
                 dff.resolve(data.feed.entry);
 
             }, function (error) {
@@ -51,8 +87,8 @@ require(['jquery', 'config'], function ($) {
             _this.getJSON(_this.configSheet).done(function (data) {
 
                 _this.config = _this.normalizeConfig(data);
-
                 console.log(_this.config);
+                _this.refreshData();
             });
         };
 
@@ -141,16 +177,5 @@ require(['jquery', 'config'], function ($) {
 
         /* tworzymy obiekt dla zawodow */
         var ulez = new Spreadsheet();
-
-        /* odsiwiezenie rezultatow */
-        setInterval(function(){
-            ulez.refreshData();
-
-        }, config.refreshTimes.results * 1000);
-
-        /* odswiezenie konfiguracji */
-        setInterval(function () {
-            ulez.refreshConfig();
-        }, config.refreshTimes.config * config.refreshTimes.results * 1000)
     });
 });
