@@ -1,0 +1,85 @@
+body {
+	background-color: black;
+	color: white;
+	font-family: 'Trebuchet MS', Trebuchet, Arial, Helvetica, Tahoma, sans-serif;
+}
+
+.driverTemplate {
+	display: none;
+}
+
+.driver {
+	width: 100%;
+	position: relative;
+
+	font-size: 40px;
+
+	line-height: 1em;
+	margin-bottom: 0.1em;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+	.driver div {
+		height: 100%;
+		position: relative;
+		float: left;
+		vertical-align: middle;
+		box-sizing: border-box;
+		white-space: nowrap;
+	}
+
+	.driver .position {
+		width: 2.5em;
+		padding-right: 0.5em;
+		text-align: right;
+		position: absolute;
+		font-size: 0.4em;
+	}
+
+	.driver .carNumber {
+		z-index: 2;
+		position: absolute;
+		width: 2em;
+		left: 2em;
+		background: #ffffff;
+		color: #000000;
+		font-weight: bold;
+		text-align: center;
+		border-radius: 100%;
+		font-size: 0.5em;
+		letter-spacing: -0.08em;
+	}
+
+	.driver .results {
+		z-index: 1;
+		width: 100%;
+		padding-left: 1.5em;
+	}
+		.driver .results .personalBest {
+			width: 50%;
+			overflow: hidden;
+			font-size: 0.6em;
+		}
+			.driver .results .personalBest .nick {
+				padding-left: 1.2em;
+				z-index: 2;
+			}
+			.driver .results .personalBest .time {
+				position: absolute;
+				text-align: right;
+				background-color: #202E5C;
+				padding-left: 0.5em;
+				padding-right: 0.4em;
+				width: 100%;
+				z-index: 1;
+			}
+		.driver .results .personalLast {
+			font-size: 0.6em;
+			background-color: #ffffff;
+			width: 2%;
+			overflow: visible;
+		}
+			.driver .results .personalLast .time {
+				margin-left: 0.3em;
+				right: -100%;
+			}
