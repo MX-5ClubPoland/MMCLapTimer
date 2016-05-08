@@ -174,11 +174,8 @@ MMCLapTimer.Spreadsheet = (function () {
 		$('body').addClass('ready'); // dodaje do body klase, po to, aby dopiero wyswietlic strone po zaladowaniu rezultatow - preloader
 
 		/* miejsce na czary zwiazane z renderem widoku */
-		console.log(this.results);
-		window.rendererTest = new MMCLapTimer.Renderer($(this.results).filter(function() {
-			//return true;
-			return this.category == 2;
-		}).toArray());
+		//console.log(this.results);
+		new MMCLapTimer.Renderer(this.results);
 	};
 
 	return Spreadsheet;

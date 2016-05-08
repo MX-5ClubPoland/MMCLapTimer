@@ -10,30 +10,52 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.load = function(results) {
 		var r;
 		this.drivers = {};
-		this.ranking = [];
-		for (r in results) {
-			this.ranking.push(this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r], {
-				container: this.config.driverTemplate.clone()
-			}));
+		this.standings = [];
+		for (r = 0; r < results.length; r++) {
+			this.standings.push(
+				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r], {
+					container: this.config.driverTemplate.clone()
+				})
+			);
 		}
 		this.sort();
 		return this;
+	}
+
+	Ranking.prototype.sort = function() {
+		this.standings.sort(this.compareDrivers);
+		return this;
+	}
+
+	Ranking.prototype.compareDrivers = function(driverA, driverB) {
+		if (!driverA.laps.length && !driverB.laps.length) {
+			return 0;
+		} else if (!driverA.laps.length) {
+			return 1;
+		} else if (!driverB.laps.length) {
+			return -1;
+		}
+		return driverA.fastestLap() - driverB.fastestLap();
 	}
 
 	/**
 	 * Finds the best lap.
 	 * @returns float
 	 */
-	Ranking.prototype.bestLap = function() {
-		var d, t, lap = null;
-		for (d in this.drivers) {
-			for (t in this.drivers[d].laps) {
-				if (lap === null || lap < this.drivers[d].laps[t]) {
-					lap = this.drivers[d].laps[t];
-				}
-			}
+	Ranking.prototype.fastestLap = function() {
+		if (this.standings.length) {
+			return this.standings[0].fastestLap();
+		} else {
+			return null;
 		}
-		return lap;
+	}
+
+	Ranking.prototype.slowestLap = function() {
+		if (this.standings.length) {
+			return $(this.standings).last()[0].slowestLap();
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -41,30 +63,30 @@ MMCLapTimer.Ranking = (function() {
 	 * @returns {MMCLapTimer.Driver} or null
 	 */
 	Ranking.prototype.fastestDriver = function() {
-		var d, t, lap = null, driver = null;
-		for (d in this.drivers) {
-			for (t in this.drivers[d].times) {
-				if (lap === null || lap < this.drivers[d].times[t]) {
-					driver = this.drivers[d];
-					lap = this.drivers[d].times[t];
-				}
-			}
+		if (this.standings[0].laps.length) {
+			return this.standings[0];
 		}
-		return driver;
+		return null;
 	}
 
-	Ranking.prototype.sort = function() {
-		this.ranking.sort(function(a, b) {
-			if (!a.laps.length && !b.laps.length) {
-				return 0;
-			} else if (!a.laps.length) {
-				return 1;
-			} else if (!b.laps.length) {
-				return -1;
+	Ranking.prototype.slowestDriver = function() {
+		var d;
+		for (d = this.standings.length - 1; d >= 0; d--) {
+			if (this.standings[d].laps.length) {
+				return this.standings[d];
 			}
-			return a.bestLap() - b.bestLap();
-		});
-		return this;
+		}
+		return null;
+	}
+
+	Ranking.prototype.slowestLastLap = function() {
+		var s, slowestLastLap = null;
+		for (s = this.standings.length - 1; s >= 0; s--) {
+			if (slowestLastLap === null || slowestLastLap < this.standings[s].lastLap()) {
+				slowestLastLap = this.standings[s].lastLap();
+			}
+		}
+		return slowestLastLap;
 	}
 
 	Ranking.prototype.destroy = function() {
