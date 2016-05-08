@@ -1,36 +1,40 @@
 MMCLapTimer.Renderer = (function() {
-	var Renderer = function(options) {
+	var Renderer = function(results, options) {
 		this.config = $.extend(true, {
-			rankingContainer: $('.ranking'),
-			driverTemplate: $('.driverTemplate:first .driver').clone()
+			driverTemplate: $('.driverTemplates .practice .driver').clone(),
+			container: $('.ranking')
 		}, options);
 
-		this.drivers = [];
+		this.ranking = new MMCLapTimer.Ranking(results);
+
+		this.draw();
 	}
 
-	Renderer.prototype.addDriver = function(driver) {
-		this.draw(driver);
-		this.config.rankingContainer.append(driver.container);
-		this.drivers.push(driver);
-		return this;
-	}
-
-	Renderer.prototype.draw = function(driver) {
-		if (!driver.container) {
-			driver.container = this.config.driverTemplate.clone();
+	Renderer.prototype.draw = function() {
+		var d, container = $('<div>');
+		for (d in this.ranking.ranking) {
+			container.append(this.ranking.ranking[d].draw().container);
 		}
-		driver.container.find('.carNumber').text(driver.number);
-		driver.container.find('.nick').text(driver.nick);
-		driver.container.find('.personalBest .time').text(driver.best).toggle(!!driver.best);
-		driver.container.find('.personalLast .time').text(driver.last).toggle(!!driver.last);
-		this.drawPositions();
+		this.config.container.html(container);
+		this.drawPositions().autoSize();
 	}
 
 	Renderer.prototype.drawPositions = function() {
-		var i;
-		for (i in this.drivers) {
-			this.drivers[i].container.find('.position').text((i + 1) + '.');
+		var d, position = 1;
+		for (d in this.ranking.ranking) {
+			this.ranking.ranking[d].drawPosition(position);
+			position++;
 		}
+		return this;
+	}
+
+	Renderer.prototype.autoSize = function() {
+		$('.driver').css({fontSize: 'calc(91vh / ' + this.ranking.ranking.length + ')'}).show();
+		return this;
+	}
+
+	Renderer.prototype.destroy = function() {
+
 	}
 
 	return Renderer;
