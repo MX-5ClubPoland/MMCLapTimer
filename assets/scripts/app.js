@@ -3,7 +3,8 @@ requirejs.config({
     paths: {
         jquery: 'jquery/dist/jquery.min',
         config: '../assets/scripts/config',
-        main: '../assets/scripts/main'
+        main: '../assets/scripts/main',
+		renderer: '../assets/scripts/renderer'
     }
 });
 
