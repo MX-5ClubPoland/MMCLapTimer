@@ -4,7 +4,7 @@ requirejs.config({
         jquery: 'jquery/dist/jquery.min',
         config: '../assets/scripts/config',
         main: '../assets/scripts/main',
-		renderer: '../assets/scripts/renderer'
+		app: '../assets/app/'
     }
 });
 
