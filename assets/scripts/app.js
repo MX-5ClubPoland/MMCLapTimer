@@ -9,4 +9,3 @@ requirejs.config({
 });
 
 require(['main']);
-//test
