@@ -1,4 +1,4 @@
-require(['jquery', 'config'], function ($) {
+require(['jquery', 'config', 'renderer'], function ($) {
 
     $(document).ready(function(){
 
