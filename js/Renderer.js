@@ -6,7 +6,7 @@ MMCLapTimer.Renderer = (function() {
 		}, options);
 
 		this.ranking = new MMCLapTimer.Ranking($(results).filter(function() {
-			return this.category == 1;
+			return this.category == 2;
 		}).toArray());
 		//this.rankings = [
 		//	new MMCLapTimer.Ranking($(results).filter(function() {
