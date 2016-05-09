@@ -3,12 +3,22 @@
 <head>
 	<meta charset="UTF-8">
 	<title>MiniMiataChallenge</title>
-	<link href="./assets/css/layout.css" rel="stylesheet" type="text/css" />
+	<link href="./css/layout.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.jquery.com/jquery.min.js"></script>
+	<script src="./js/config.js"></script>
+	<script src="./js/MMCLapTimer.js"></script>
+	<script src="./js/Driver.js"></script>
+	<script src="./js/Ranking.js"></script>
+	<script src="./js/Spreadsheet.js"></script>
+	<script src="./js/Renderer.js"></script>
+
+	<script>
+		var ulez = new MMCLapTimer.Spreadsheet();
+	</script>
 </head>
 <body>
 	<div class="results"></div>
-	<script data-main="assets/scripts/app" src="bower_components/requirejs/require.js"></script>
-
 	<div class="ranking"></div>
 
 	<div class="driverTemplates">
