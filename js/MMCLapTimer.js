@@ -1,2 +1,6 @@
-// Main namespace
+/**
+ * MMCLapTimer namespace
+ * Options:
+ * 	results
+ */
 var MMCLapTimer = {}

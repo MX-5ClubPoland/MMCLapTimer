@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 MMCLapTimer.Spreadsheet = (function () {
 
 	function Spreadsheet() {
@@ -174,8 +177,22 @@ MMCLapTimer.Spreadsheet = (function () {
 		$('body').addClass('ready'); // dodaje do body klase, po to, aby dopiero wyswietlic strone po zaladowaniu rezultatow - preloader
 
 		/* miejsce na czary zwiazane z renderem widoku */
-		//console.log(this.results);
-		new MMCLapTimer.Renderer(this.results);
+		console.log(this.results);
+
+
+		if (window.practice) {
+			window.practice.destroy();
+			//$('.sessions')
+		}
+
+		window.practice = new MMCLapTimer.Session({
+			results: this.results
+		});
+		practice.draw();
+		if (practice.container) {
+			$('.sessions').append(practice.container);
+			practice.adjustHeights();
+		}
 	};
 
 	return Spreadsheet;
