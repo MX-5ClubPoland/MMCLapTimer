@@ -115,6 +115,7 @@ MMCLapTimer.Driver = (function() {
 	Driver.prototype.reset = function(data) {
 		this.laps = [];
 		this.data = null;
+		return this;
 	}
 
 	Driver.prototype.destroy = function() {
@@ -123,6 +124,7 @@ MMCLapTimer.Driver = (function() {
 			this.container.remove();
 		}
 		this.container = null;
+		return this;
 	}
 
 	return Driver;

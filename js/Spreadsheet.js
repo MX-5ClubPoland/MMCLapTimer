@@ -180,19 +180,16 @@ MMCLapTimer.Spreadsheet = (function () {
 		console.log(this.results);
 
 
-		if (window.practice) {
-			window.practice.destroy();
-			//$('.sessions')
+		if (window.trackday) {
+			window.trackday.destroy();
 		}
 
-		window.practice = new MMCLapTimer.Session({
-			results: this.results
-		});
-		practice.draw();
-		if (practice.container) {
-			$('.sessions').append(practice.container);
-			practice.adjustHeights();
-		}
+		window.trackday = new MMCLapTimer.Trackday({
+			container: $('.trackday:first'),
+			sessionTemplate: $('.templates .session').clone(),
+			rankingTemplate: $('.templates .ranking.practice').clone(),
+			driverTemplate: $('.templates .driver.practice').clone(),
+		}).load(this.results).draw();
 	};
 
 	return Spreadsheet;

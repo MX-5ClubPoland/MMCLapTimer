@@ -31,7 +31,7 @@
 	box-sizing: border-box;
 	padding-right: 2em;
 	white-space: nowrap;
-	min-width: 4.2em;
+	/*min-width: 4.2em;*/
 }
 	.driver div {
 		position: relative;

@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<title>MiniMiataChallenge</title>
 	<link href="./css/layout.css" rel="stylesheet" type="text/css" />
+	<link href="./css/trackday.css" rel="stylesheet" type="text/css" />
 
 	<script src="http://code.jquery.com/jquery.min.js"></script>
 	<script src="./js/config.js"></script>
@@ -13,6 +14,7 @@
 	<script src="./js/Spreadsheet.js"></script>
 	<script src="./js/Renderer.js"></script>
 	<script src="./js/Session.js"></script>
+	<script src="./js/Trackday.js"></script>
 
 	<script>
 		jQuery(function($) {
@@ -21,7 +23,9 @@
 	</script>
 </head>
 <body>
-	<div class="sessions"></div>
+	<div class="trackdays">
+		<div class="trackday"></div>
+	</div>
 
 	<div class="templates">
 		<div class="driver practice">
@@ -58,8 +62,11 @@
 			</div>
 		</div>
 
+		<div class="session"></div>
+
 		<div class="ranking practice">
 			<h2 class="category"></h2>
+			<div class="standings"></div>
 		</div>
 	</div>
 

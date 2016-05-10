@@ -4,7 +4,7 @@
  * @constructor
  * Options:
  * 	driverTemplate
- * 	rankingTemplate
+ * 	container
  * 	category
  */
 MMCLapTimer.Ranking = (function() {
@@ -15,10 +15,8 @@ MMCLapTimer.Ranking = (function() {
 		if (options.driverTemplate) {
 			this.driverTemplate = options.driverTemplate;
 		}
-		if (options.rankingTemplate) {
-			this.rankingTemplate = options.rankingTemplate;
-		} else {
-			this.rankingTemplate = $('.templates .ranking.practice').clone();
+		if (options.container) {
+			this.container = options.container;
 		}
 		this.load(results);
 	}
@@ -28,17 +26,15 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.standings = [];
 	Ranking.prototype.category = '';
 	Ranking.prototype.driverTemplate = null;
-	Ranking.prototype.rankingTemplate = null;
 	Ranking.prototype.showDriverRecursivelyTimeout = null;
 
 	Ranking.prototype.load = function(results) {
 		var r;
 		this.reset();
-		this.container = this.rankingTemplate ? $(this.rankingTemplate).clone() : $('<div class="ranking">');
 		for (r = 0; r < results.length; r++) {
 			this.standings.push(
 				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r], {
-					container: this.driverTemplate ? $(this.driverTemplate).clone() : undefined
+					container: this.driverTemplate ? $(this.driverTemplate).clone() : null
 				})
 			);
 		}
@@ -119,12 +115,18 @@ MMCLapTimer.Ranking = (function() {
 
 	Ranking.prototype.draw = function() {
 		var d;
+		if (!this.container) {
+			this.container = $('<div class="ranking">');
+		}
 		if (this.standings.length) {
+			if (!this.standings.container) {
+				this.standings.container = this.container.find('.standings:first').length ? this.container.find('.standings:first') : this.container;
+			}
 			for (d = 0; d < this.standings.length; d++) {
 				this.standings[d]
 					.draw()
 					.drawPosition(d + 1)
-					.container.appendTo(this.container);
+					.container.appendTo(this.standings.container);
 			}
 			this.tune();
 		}
@@ -183,19 +185,24 @@ MMCLapTimer.Ranking = (function() {
 		while (this.standings.length > 0) {
 			this.standings.shift().destroy();
 		}
+		if (this.standings.container) {
+			this.standings.container.remove();
+			delete this.standings.container;
+		}
 		this.standings = [];
 
 		if (this.container) {
 			this.container.remove();
 		}
 		this.container = null;
+		return this;
 	}
 
 	Ranking.prototype.destroy = function() {
 		this.reset();
 		this.category = '';
 		this.driverTemplate = null;
-		this.rankingTemplate = null;
+		return this;
 	}
 
 	return Ranking;
