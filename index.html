@@ -8,6 +8,7 @@
 	<script src="http://code.jquery.com/jquery.min.js"></script>
 	<script src="./js/config.js"></script>
 	<script src="./js/MMCLapTimer.js"></script>
+	<script src="./js/loader.js"></script>
 	<script src="./js/Driver.js"></script>
 	<script src="./js/Ranking.js"></script>
 	<script src="./js/Spreadsheet.js"></script>
@@ -22,6 +23,15 @@
 </head>
 <body>
 	<div class="sessions"></div>
+
+	<div id="loadingOverlay">
+		<div id="spinner">
+		  <div class="bounce1"></div>
+		  <div class="bounce2"></div>
+		  <div class="bounce3"></div>
+		</div>
+		<span id="loadingError"></span>
+	</div>
 
 	<div class="templates">
 		<div class="driver practice">
