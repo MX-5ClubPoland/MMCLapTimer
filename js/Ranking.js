@@ -134,7 +134,7 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.tune = function() {
 		var d;
 		for (d = 0; d < this.standings.length; d++) {
-			this.standings[d].container.hide();
+			//this.standings[d].container.hide();
 			this.standings[d].container.find('.personalFastest').css({
 				width: this.barWidth(this.standings[d].fastestLap()) + '%'
 			});
@@ -162,7 +162,7 @@ MMCLapTimer.Ranking = (function() {
 		if (driver) {
 			this.showDriverRecursivelyTimeout = setTimeout(function() {
 				driver.container.animate({
-					width: 'show',
+					width: '100%',
 				}, {
 					duration: 300
 				});
