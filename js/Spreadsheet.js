@@ -193,6 +193,8 @@ MMCLapTimer.Spreadsheet = (function () {
 			$('.sessions').append(practice.container);
 			practice.adjustHeights();
 		}
+
+		MMCLapTimer.loader.hide();
 	};
 
 	return Spreadsheet;
