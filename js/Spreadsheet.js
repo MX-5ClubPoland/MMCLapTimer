@@ -187,6 +187,8 @@ MMCLapTimer.Spreadsheet = (function () {
 		window.trackday = new MMCLapTimer.Trackday({
 			container: $('.trackday:first')
 		}).load(this.results).draw();
+
+		MMCLapTimer.loader.hide();
 	};
 
 	return Spreadsheet;
