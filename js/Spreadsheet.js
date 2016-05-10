@@ -185,10 +185,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		}
 
 		window.trackday = new MMCLapTimer.Trackday({
-			container: $('.trackday:first'),
-			sessionTemplate: $('.templates .session').clone(),
-			rankingTemplate: $('.templates .ranking.practice').clone(),
-			driverTemplate: $('.templates .driver.practice').clone(),
+			container: $('.trackday:first')
 		}).load(this.results).draw();
 	};
 

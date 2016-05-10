@@ -8,14 +8,14 @@ MMCLapTimer.Driver = (function() {
 		if (options.container) {
 			this.container = options.container;
 		}
-		this.load(data);
+		this.init(data);
 	}
 
 	Driver.prototype.data = {};
 	Driver.prototype.laps = [];
 	Driver.prototype.container = null;
 
-	Driver.prototype.load = function(data) {
+	Driver.prototype.init = function(data) {
 		var i;
 		this.reset();
 		if (data) {

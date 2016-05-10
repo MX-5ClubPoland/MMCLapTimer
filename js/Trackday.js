@@ -2,41 +2,22 @@
  * @constructor
  * Options:
  * 	container
- * 	sessionTemplate
- * 	rankingTemplate
- * 	driverTemplate
  */
 MMCLapTimer.Trackday = (function() {
 	var Trackday = function(options) {
-		if (options.sessionTemplate) {
-			this.sessionTemplate = options.sessionTemplate;
-		}
-		if (options.rankingTemplate) {
-			this.rankingTemplate = options.rankingTemplate;
-		}
-		if (options.driverTemplate) {
-			this.driverTemplate = options.driverTemplate;
-		}
 		if (options.container) {
 			this.container = options.container;
 		}
-
-		this.load();
 	}
 
 	Trackday.prototype.sessions = {};
 	Trackday.prototype.container = null;
-	Trackday.prototype.sessionTemplate = null;
-	Trackday.prototype.rankingTemplate = null;
-	Trackday.prototype.driverTemplate = null;
 
 	Trackday.prototype.load = function(singleSessionResults) {
 		var s;
 		this.reset();
 		this.sessions.practice = new MMCLapTimer.Session({
-			container: this.sessionTemplate ? this.sessionTemplate.clone() : null,
-			rankingTemplate: this.rankingTemplate,
-			driverTemplate: this.driverTemplate,
+			container: $('.templates .session.practice').first().clone(),
 			results: singleSessionResults
 		});
 		return this;
@@ -52,7 +33,7 @@ MMCLapTimer.Trackday = (function() {
 	Trackday.prototype.draw = function() {
 		var s;
 		if (!this.container) {
-			this.container = $('<dic class="trackday">')
+			this.container = $('<dic class="trackday">');
 		}
 		for (s in this.sessions) {
 			this.sessions[s].draw().container.appendTo(this.container);
@@ -71,9 +52,10 @@ MMCLapTimer.Trackday = (function() {
 
 	Trackday.prototype.destroy = function() {
 		this.reset();
-		this.sessionTemplate = null;
-		this.rankingTemplate = null;
-		this.driverTemplate = null;
+		if (this.container) {
+			this.container.remove();
+		}
+		this.container = null;
 		return this;
 	}
 

@@ -3,7 +3,6 @@
  * @param {Object} options
  * @constructor
  * Options:
- * 	driverTemplate
  * 	container
  * 	category
  */
@@ -11,9 +10,6 @@ MMCLapTimer.Ranking = (function() {
 	var Ranking = function(results, options) {
 		if (options.category) {
 			this.category = options.category;
-		}
-		if (options.driverTemplate) {
-			this.driverTemplate = options.driverTemplate;
 		}
 		if (options.container) {
 			this.container = options.container;
@@ -25,7 +21,6 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.drivers = {};
 	Ranking.prototype.standings = [];
 	Ranking.prototype.category = '';
-	Ranking.prototype.driverTemplate = null;
 	Ranking.prototype.showDriverRecursivelyTimeout = null;
 
 	Ranking.prototype.load = function(results) {
@@ -34,7 +29,7 @@ MMCLapTimer.Ranking = (function() {
 		for (r = 0; r < results.length; r++) {
 			this.standings.push(
 				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r], {
-					container: this.driverTemplate ? $(this.driverTemplate).clone() : null
+					container: $('.templates .driver.practice').first().clone()
 				})
 			);
 		}
@@ -128,24 +123,17 @@ MMCLapTimer.Ranking = (function() {
 					.drawPosition(d + 1)
 					.container.appendTo(this.standings.container);
 			}
-			this.tune();
-		}
-		return this;
-	}
 
-	Ranking.prototype.tune = function() {
-		var d;
-		for (d = 0; d < this.standings.length; d++) {
-			//this.standings[d].container.hide();
-			this.standings[d].container.find('.personalFastest').css({
-				width: this.barWidth(this.standings[d].fastestLap()) + '%'
-			});
-			this.standings[d].container.find('.personalLast').css({
-				width: this.barWidth(this.standings[d].lastLap()) + '%'
-			});
+			for (d = 0; d < this.standings.length; d++) {
+				//this.standings[d].container.hide();
+				this.standings[d].container.find('.personalFastest').css({
+					width: this.barWidth(this.standings[d].fastestLap()) + '%'
+				});
+				this.standings[d].container.find('.personalLast').css({
+					width: this.barWidth(this.standings[d].lastLap()) + '%'
+				});
+			}
 		}
-		this.container.find('.category').text(this.category);
-		//this.standings[0].container.find('.personalFastest').addClass('generalFastest');
 		return this;
 	}
 
@@ -190,18 +178,16 @@ MMCLapTimer.Ranking = (function() {
 			delete this.standings.container;
 		}
 		this.standings = [];
-
-		if (this.container) {
-			this.container.remove();
-		}
-		this.container = null;
 		return this;
 	}
 
 	Ranking.prototype.destroy = function() {
 		this.reset();
 		this.category = '';
-		this.driverTemplate = null;
+		if (this.container) {
+			this.container.remove();
+		}
+		this.container = null;
 		return this;
 	}
 

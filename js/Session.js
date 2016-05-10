@@ -1,8 +1,6 @@
 /**
  * @constructor
  * Options:
- *  rankingTemplate
- *  driverTemplate
  *  container
  * 	results
  * 	name
@@ -12,12 +10,6 @@ MMCLapTimer.Session = (function(options) {
 		this.rankings = [];
 		this.categories = {};
 		this.container = null;
-		if (options.rankingTemplate) {
-			this.rankingTemplate = options.rankingTemplate;
-		}
-		if (options.driverTemplate) {
-			this.driverTemplate = options.driverTemplate;
-		}
 		if (options.container) {
 			this.container = options.container;
 		}
@@ -32,8 +24,6 @@ MMCLapTimer.Session = (function(options) {
 	Session.prototype.name = '';
 	Session.prototype.rankings = [];
 	Session.prototype.categories = {};
-	Session.prototype.rankingTemplate = null;
-	Session.prototype.driverTemplate = null;
 	Session.prototype.container = null;
 
 	/**
@@ -50,8 +40,7 @@ MMCLapTimer.Session = (function(options) {
 			this.rankings.push(
 				this.categories[category] = new MMCLapTimer.Ranking(categorizedResults[category], {
 					category: category,
-					container: this.rankingTemplate ? this.rankingTemplate.clone() : null,
-					driverTemplate: this.driverTemplate
+					container: $('.templates .ranking.practice.category-' + category).first().clone()
 				})
 			);
 		}
@@ -109,7 +98,7 @@ MMCLapTimer.Session = (function(options) {
 			this.rankings[i].container.find('.driver').css('width', 0).show();
 			this.rankings[i].showDriverRecursively(0);
 		}
-		if (this.fastestDriver()) {
+		if (i > 0) {
 			this.drawFastestLap();
 			this.adjustHeights();
 		}
@@ -121,14 +110,15 @@ MMCLapTimer.Session = (function(options) {
 		return this;
 	}
 
-	//Session.prototype.longerColumn = function() {
-	//	return this.rankings[0].standings.length >= this.rankings[1].standings.length + this.rankings[2].standings.length ? 'left' : 'right';
-	//}
-
 	Session.prototype.adjustHeights = function() {
 		var rowsCount = Math.max(this.rankings[0].standings.length, this.rankings[1].standings.length + this.rankings[2].standings.length, 12);
 		//this.container.css({fontSize: ($(window).height() * 0.85 / rowsCount) + 'px'});
-		this.container.css({fontSize: 'calc(85vh / ' + rowsCount + ')'});
+		this.container.css({
+			fontSize: 'calc(85vh / ' + rowsCount + ')'
+		});
+		$('body').css({
+			minHeight: '500px'
+		});
 		return this;
 	}
 
@@ -149,8 +139,6 @@ MMCLapTimer.Session = (function(options) {
 			this.container.remove();
 		}
 		this.container = null;
-		this.rankingTemplate = null;
-		this.driverTemplate = null;
 		this.name = '';
 	}
 
