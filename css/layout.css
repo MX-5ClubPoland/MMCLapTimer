@@ -7,21 +7,36 @@ html, body {
 }
 
 body {
-	padding: 1vh;
-	background-color: black;
-	color: white;
+	padding: 0 2% 0 2%;
+	background-color: #000000;
+	color: #ffffff;
 	font-family: 'Trebuchet MS', Trebuchet, Arial, Helvetica, Tahoma, sans-serif;
 }
 
-.driverTemplates {
-	display: none;
+.session {
+	font-size: 50px;
 }
+
+	.session .ranking {
+		width: 50%;
+		float: left;
+		box-sizing: border-box;
+		min-width: 4.2em;
+		margin-bottom: 1em;
+		overflow: hidden;
+	}
+		.session .ranking .category {
+			line-height: 1.5em;
+			font-size: 1em;
+			margin: 0;
+			padding: 0;
+		}
 
 .driver {
 	width: 100%;
 	position: relative;
 
-	font-size: 50px;
+
 
 	line-height: 1em;
 	margin-bottom: 0.1em;
@@ -30,7 +45,7 @@ body {
 	box-sizing: border-box;
 	padding-right: 2em;
 	white-space: nowrap;
-	min-width: 7em;
+	min-width: 4.2em;
 }
 	.driver div {
 		position: relative;
@@ -62,29 +77,30 @@ body {
 		letter-spacing: -0.08em;
 	}
 
-	.driver .results {
+	.driver .laps {
 		z-index: 1;
 		width: 100%;
 		padding-left: 1.5em;
 	}
-		.driver .results .layer {
+		.driver .laps .layer {
 			position: relative;
 			width: 100%;
 			font-size: 0.6em;
 		}
-			.driver .results .bar {
+			.driver .laps .bar {
 				position: absolute;
+				min-width: 4.5em;
 			}
-			.driver .results .bar:first-child {
+			.driver .laps .bar:first-child {
 				position: relative;
 			}
-			.driver .results .nick {
+			.driver .laps .nick {
 				position: relative;
 				padding-left: 1.2em;
 				z-index: 1;
 				width: 100%;
 			}
-			.driver .results .personalFastest {
+			.driver .laps .personalFastest {
 				position: absolute;
 				background-color: #233854;
 				width: 80%;
@@ -92,15 +108,15 @@ body {
 				z-index: 3;
 				overflow: hidden;
 			}
-			.driver .results .personalFastest.generalFastest {
+			.driver .laps .personalFastest.generalFastest {
 				background-color: #870079;
 			}
-				.driver .results .personalFastest .nick {
+				.driver .laps .personalFastest .nick {
 					width: auto;
 					z-index: 1;
 					overflow: hidden;
 				}
-				.driver .results .personalFastest .time {
+				.driver .laps .personalFastest .time {
 					position: absolute;
 					z-index: 2;
 					right: 0;
@@ -108,17 +124,17 @@ body {
 					padding-left: 0.4em;
 					background-color: #233854;
 				}
-				.driver .results .personalFastest.generalFastest .time {
+				.driver .laps .personalFastest.generalFastest .time {
 					background-color: #870079;
 				}
-			.driver .results .personalLast {
+			.driver .laps .personalLast {
 				position: absolute;
 				background-color: #888888;
 				width: 85%;
 				height: 100%;
 				z-index: 1;
 			}
-				.driver .results .personalLast .time {
+				.driver .laps .personalLast .time {
 					text-align: right;
 					position: absolute;
 					left: 100%;
@@ -127,6 +143,6 @@ body {
 					font-size: 0.8em;
 				}
 
-.ranking {
-	width: 80%;
+.templates {
+	display: none;
 }

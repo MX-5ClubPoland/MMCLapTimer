@@ -12,33 +12,55 @@
 	<script src="./js/Ranking.js"></script>
 	<script src="./js/Spreadsheet.js"></script>
 	<script src="./js/Renderer.js"></script>
+	<script src="./js/Session.js"></script>
 
 	<script>
-		var ulez = new MMCLapTimer.Spreadsheet();
+		jQuery(function($) {
+			var ulez = new MMCLapTimer.Spreadsheet();
+		});
 	</script>
 </head>
 <body>
-	<div class="results"></div>
-	<div class="ranking"></div>
+	<div class="sessions"></div>
 
-	<div class="driverTemplates">
-		<div class="practice">
-			<div class="driver">
-				<div class="position"></div>
-				<div class="number"></div>
-				<div class="results">
-					<div class="layer">
-						<div class="nick bar"></div>
-						<div class="personalFastest bar">
-							<div class="nick"></div>
-							<div class="time"></div>
-						</div>
-						<div class="personalLast bar">
-							<div class="time"></div>
-						</div>
+	<div class="templates">
+		<div class="driver practice">
+			<div class="position"></div>
+			<div class="number"></div>
+			<div class="laps">
+				<div class="layer">
+					<div class="nick bar"></div>
+					<div class="personalFastest bar">
+						<div class="nick"></div>
+						<div class="time"></div>
+					</div>
+					<div class="personalLast bar">
+						<div class="time"></div>
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<div class="driver rallysprint">
+			<div class="position"></div>
+			<div class="number"></div>
+			<div class="laps">
+				<div class="layer">
+					<div class="nick bar"></div>
+					<div class="personalFastest bar">
+						<div class="nick"></div>
+						<div class="time"></div>
+					</div>
+					<div class="personalLast bar">
+						<div class="time"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="ranking practice">
+			<h2 class="category"></h2>
+			<div class="standings"></div>
 		</div>
 	</div>
 
