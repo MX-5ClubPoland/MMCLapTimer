@@ -93,6 +93,7 @@ MMCLapTimer.Session = (function(options) {
 			this.rankings[i].container.appendTo(this.container);
 		}
 		for (i = 0; i < this.rankings.length; i++) {
+			this.rankings[i].container.find('.driver').css('width', 0).show();
 			this.rankings[i].showDriverRecursively(0);
 		}
 		if (this.fastestDriver()) {
