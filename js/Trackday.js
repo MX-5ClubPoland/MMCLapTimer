@@ -3,8 +3,8 @@
  * Options:
  * 	container
  */
-MMCLapTimer.Renderer = (function() {
-	var Renderer = function(ranking, options) {
+MMCLapTimer.Trackday = (function() {
+	var Trackday = function(ranking, options) {
 		this.config = $.extend(true, {
 			container: $('.practice .ranking')
 		}, options);
@@ -13,9 +13,9 @@ MMCLapTimer.Renderer = (function() {
 		this.draw();
 	}
 
-	Renderer.prototype.destroy = function() {
+	Trackday.prototype.destroy = function() {
 
 	}
 
-	return Renderer;
+	return Trackday;
 })();
