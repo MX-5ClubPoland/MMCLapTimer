@@ -3,14 +3,14 @@
  */
 MMCLapTimer.Spreadsheet = (function () {
 
-	function Spreadsheet() {
+	var Spreadsheet = function(options) {
 		this.timestamps = {};
 		this.configSheet = config.configSheet;
 		this.config = {};
-		this.results = new Array();
-		this.resultsPractice = new Array();
+		this.results = [];
+		this.resultsPractice = [];
 		this.init();
-	}
+	};
 
 	Spreadsheet.prototype.init = function() {
 		var _this = this;
@@ -162,7 +162,7 @@ MMCLapTimer.Spreadsheet = (function () {
 
 		_this.getJSON(_this.config.sheetPractice[0]).done(function(data) {
 			_this.results = _this.normalizeResults(data);
-			_this.refreshView();
+			_this.triggerComplete();
 		});
 
 
@@ -173,7 +173,7 @@ MMCLapTimer.Spreadsheet = (function () {
 	}
 
 	/* metoda do odsiwezania widoku */
-	Spreadsheet.prototype.refreshView = function() {
+	Spreadsheet.prototype.triggerComplete = function() {
 		$('body').addClass('ready'); // dodaje do body klase, po to, aby dopiero wyswietlic strone po zaladowaniu rezultatow - preloader
 
 		/* miejsce na czary zwiazane z renderem widoku */
