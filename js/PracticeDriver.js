@@ -3,63 +3,48 @@
  * Options:
  * 	container
  */
-MMCLapTimer.Driver = (function() {
-	var fields = ['category', 'model', 'name', 'nick', 'number', 'times'];
-
-	var Driver = function(result, options) {
+MMCLapTimer.PracticeDriver = (function() {
+	var Driver = function(data, options) {
 		if (options.container) {
 			this.container = options.container;
 		}
-		this.init(result);
+		this.init(data);
 	}
 
-	Driver.prototype.category = '';
-	Driver.prototype.model = '';
-	Driver.prototype.name = '';
-	Driver.prototype.nick = '';
-	Driver.prototype.number = '';
-	Driver.prototype.times = [];
+	Driver.prototype.data = {};
 	Driver.prototype.laps = [];
 	Driver.prototype.container = null;
 
-	Driver.prototype.init = function(result) {
-		return this.reset(result);
-	}
-
-	Driver.prototype.update = function(result) {
+	Driver.prototype.init = function(data) {
 		var i;
-		for (i in result) {
-			if (fields.indexOf(i) > 0) {
-				this[i] = result[i];
+		this.reset();
+		if (data) {
+			this.data = data;
+			if (this.data.times) {
+				for (i in this.data.times) {
+					this.laps.push(this.data.times[i] = parseFloat(this.data.times[i]));
+				}
 			}
-		}
-		if (this.times.length) {
-			for (i in result.times) {
-				this.times.push(this.laps[i] = parseFloat(this.times[i]));
-			}
-			this.times.sort();
+			this.laps.sort();
 		}
 		return this;
 	}
 
+	Driver.prototype.update = function(data) {
+		return this.reset(data).draw();
+	}
+
 	Driver.prototype.fastestLap = function() {
-		if (this.times.length) {
-		//	return Math.min.apply(Math, this.times);
-			return this.times[0];
+		if (this.laps.length) {
+		//if (this.data.times.length) {
+		//	return Math.min.apply(Math, this.laps);
+			return this.laps[0];
 		} else {
 			return null;
 		}
 	}
 
 	Driver.prototype.slowestLap = function() {
-		if (this.times.length) {
-			return $(this.times).last()[0];
-		} else {
-			return null;
-		}
-	}
-
-	Driver.prototype.lastLap = function() {
 		if (this.laps.length) {
 			return $(this.laps).last()[0];
 		} else {
@@ -67,12 +52,20 @@ MMCLapTimer.Driver = (function() {
 		}
 	}
 
+	Driver.prototype.lastLap = function() {
+		if (this.data.times.length) {
+			return $(this.data.times).last()[0];
+		} else {
+			return null;
+		}
+	}
+
 	/**
-	 * Returns top N times.
+	 * Returns top N laps.
 	 * @param n
 	 * @returns {Array}
 	 */
-	Driver.prototype.topNTimes = function(n) {
+	Driver.prototype.topNLaps = function(n) {
 		var times = [];
 		if (this.times.length) {
 			times = this.times;
@@ -90,11 +83,11 @@ MMCLapTimer.Driver = (function() {
 		if (!this.container) {
 			this.container = $('<div class="driver">');
 		}
-		this.container.find('.number').text(this.number);
+		this.container.find('.number').text(this.data.number);
 		if (fastestLap || lastLap) {
 			this.container.find('.nick.bar').remove();
 		}
-		this.container.find('.nick').text(this.nick);
+		this.container.find('.nick').text(this.data.nick);
 		this.container.find('.personalFastest')
 			.toggle(!!fastestLap)
 			.find('.time').text(this.formatLaptime(fastestLap));
@@ -119,17 +112,9 @@ MMCLapTimer.Driver = (function() {
 		return this;
 	}
 
-	Driver.prototype.reset = function(result) {
-		this.category = '';
-		this.model = '';
-		this.name = '';
-		this.nick = '';
-		this.number = '';
-		this.times = [];
+	Driver.prototype.reset = function(data) {
 		this.laps = [];
-		if (result) {
-			this.update(result);
-		}
+		this.data = null;
 		return this;
 	}
 

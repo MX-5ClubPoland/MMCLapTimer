@@ -43,11 +43,11 @@ MMCLapTimer.Ranking = (function() {
 	}
 
 	Ranking.prototype.compareDrivers = function(driverA, driverB) {
-		if (!driverA.laps.length && !driverB.laps.length) {
+		if (!driverA.times.length && !driverB.times.length) {
 			return 0;
-		} else if (!driverA.laps.length) {
+		} else if (!driverA.times.length) {
 			return 1;
-		} else if (!driverB.laps.length) {
+		} else if (!driverB.times.length) {
 			return -1;
 		}
 		return driverA.fastestLap() - driverB.fastestLap();
@@ -82,7 +82,7 @@ MMCLapTimer.Ranking = (function() {
 	 * @returns {MMCLapTimer.Driver} or null
 	 */
 	Ranking.prototype.fastestDriver = function() {
-		if (this.standings[0].laps.length) {
+		if (this.standings[0].times.length) {
 			return this.standings[0];
 		}
 		return null;
@@ -91,7 +91,7 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.slowestDriver = function() {
 		var d;
 		for (d = this.standings.length - 1; d >= 0; d--) {
-			if (this.standings[d].laps.length) {
+			if (this.standings[d].times.length) {
 				return this.standings[d];
 			}
 		}
