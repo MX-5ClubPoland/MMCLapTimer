@@ -6,10 +6,11 @@
 MMCLapTimer.Collector = (function() {
 
 	var Collector = function(options) {
+		options = options || {};
 
 	};
 
-	Collector.prototype.spreadsheets = [];
+	Collector.prototype.sources = [];
 
 	Collector.prototype.enqueue = function(spreadsheet) {
 		this.spreadsheets.push(spreadsheet);

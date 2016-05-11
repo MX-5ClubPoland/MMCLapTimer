@@ -7,6 +7,7 @@ MMCLapTimer.Driver = (function() {
 	var fields = ['category', 'model', 'name', 'nick', 'number', 'times'];
 
 	var Driver = function(result, options) {
+		options = options || {};
 		if (options.container) {
 			this.container = options.container;
 		}

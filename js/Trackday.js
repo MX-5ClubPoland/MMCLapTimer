@@ -1,38 +1,75 @@
 /**
  * @constructor
  * Options:
- * 	container
+ * 	{ConfigSpreadsheet|String} config
+ * 	{HTMLElement} container
  */
 MMCLapTimer.Trackday = (function() {
 	var Trackday = function(options) {
-		var that = this;
-		if (options.container) {
-			this.container = options.container;
-		}
+		options = options || {};
+		this.config = null;
+		this.container = options.container || null;
 
-		//this.collector = new MMCLapTimer.Collector();
-		//// download config
-		//config = new Spreadsheet(config);
-		//// download results x3
-		//for (i in config.practiceSpreadsheets) {
-		//	this.collector.enqueue(config.practiceSpreadsheets[i]);
-		//}
-		//this.collector.iterate(3, function(results) {
-		//	that.load(results);
-		//});
-		//// register obeserver
-		//this.collector.enqueue()
+		if (options.config) {
+			this.load(options.config);
+		}
 	}
 
 	Trackday.prototype.sessions = {};
 	Trackday.prototype.container = null;
 
-	Trackday.prototype.load = function(singleSessionResults) {
-		var s;
+	Trackday.prototype.load2 = function(singleSessionResults) {
+		var that = this;
+		this.collector = new MMCLapTimer.Collector();
+		// download config
+		config = new Spreadsheet(config);
+		// download results x3
+		for (i in config.practiceSpreadsheets) {
+			this.collector.enqueue(config.practiceSpreadsheets[i]);
+		}
+		this.collector.iterate(3, function(results) {
+			that.loadByConfig(results);
+		});
+		// register obeserver
+		this.collector.enqueue()
+	}
+
+	Trackday.prototype.load = function(config) {
+		if (typeof config === 'string') {
+			this.loadByToken(config);
+		} else {
+			this.loadByConfig(config);
+		}
+	}
+
+	Trackday.prototype.loadByToken = function(configToken) {
+		var that = this;
+		new MMCLapTimer.ConfigSpreadsheet(configToken, {
+			complete:function() {
+				this.data.spreadsheet = this;
+				that.loadByConfig(this.data);
+			}
+		});
+		return this;
+	}
+
+	Trackday.prototype.loadByConfig = function(config) {
 		this.reset();
-		this.sessions.practice = new MMCLapTimer.Session({
-			container: $('.templates .session.practice').first().clone(),
-			results: singleSessionResults
+		this.config = config;
+		this.loadResults();
+	}
+
+	Trackday.prototype.loadResults = function() {
+		var that = this;
+		new MMCLapTimer.ResultsSpreadsheet(this.config.sheetPractice[0], {
+			complete:function() {
+				that.sessions.practice = new MMCLapTimer.Session({
+					container: $('.templates .session.practice').first().clone(),
+					results: this.data
+				});
+				MMCLapTimer.loader.hide();
+				that.draw();
+			}
 		});
 		return this;
 	}
@@ -70,6 +107,8 @@ MMCLapTimer.Trackday = (function() {
 			this.container.remove();
 		}
 		this.container = null;
+
+		this.config = null;
 		return this;
 	}
 

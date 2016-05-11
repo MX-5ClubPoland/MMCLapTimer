@@ -1,52 +1,84 @@
 /**
  * @constructor
+ * Options:
+ * 	complete
  */
 MMCLapTimer.Spreadsheet = (function () {
 
-	var Spreadsheet = function(options) {
-		this.timestamps = {};
-		this.configSheet = config.configSheet;
-		this.config = {};
-		this.results = [];
-		this.resultsPractice = [];
-		this.init();
+	var Spreadsheet = function(token, options) {
+		options = options || {};
+		this.lastModified = null;
+		this.token = token;
+		this.data = {};
+
+		if (this.token && options.complete) {
+			this.load(options.complete);
+		}
 	};
 
-	Spreadsheet.prototype.init = function() {
-		var _this = this;
+	Spreadsheet.prototype.url = function() {
+		return 'https://spreadsheets.google.com/feeds/list/' + this.token + '/od6/public/values?alt=json';
+	}
 
-		this.refreshConfig();
+	Spreadsheet.prototype.load = function(complete) {
+		var that = this;
+		this.getJSON(this.token).done(function(data) {
+			that.data = that.normalize(data);
+			if (typeof complete === 'function') {
+				complete.call(that);
+			}
+		});
+		return this;
+	}
 
-		setInterval(function configInterval() {
-			_this.dirtyCheck(_this.configSheet, _this.timestamps).done(function dirtyCheckCb(isChanged) {
-				if (isChanged) {
-					_this.refreshConfig();
-				}
-			});
-		}, config.refreshTimes.config * config.refreshTimes.results * 1000);
+	Spreadsheet.prototype.reload = function(complete) {
+		var that = this;
+		this.dirtyCheck().done(function(isChanged) {
+			if (isChanged) {
+				that.load();
+			}
+		});
+		return this;
+	}
 
-		setInterval(function dataInterval() {
-			_this.dirtyCheck(_this.config.sheetPractice[0], _this.timestamps).done(function dirtyCheckCb(isChanged) {
-				if (isChanged) {
-					_this.refreshData();
-				}
-			});
-		}, config.refreshTimes.results * 1000);
+	//Spreadsheet.prototype.init = function() {
+	//	var _this = this;
+	//
+	//	this.refreshConfig();
+	//
+	//	setInterval(function configInterval() {
+	//		_this.dirtyCheck(_this.configSheetToken).done(function dirtyCheckCb(isChanged) {
+	//			if (isChanged) {
+	//				_this.refreshConfig();
+	//			}
+	//		});
+	//	}, config.refreshTimes.config * config.refreshTimes.results * 1000);
+	//
+	//	setInterval(function dataInterval() {
+	//		_this.dirtyCheck(_this.config.sheetPractice[0], _this.lastModified).done(function dirtyCheckCb(isChanged) {
+	//			if (isChanged) {
+	//				_this.refresh();
+	//			}
+	//		});
+	//	}, config.refreshTimes.results * 1000);
+	//};
+
+	Spreadsheet.prototype.normalize = function(json) {
+		return json;
 	};
 
 	/* Sprawdzanie czy last-modified header się zmienił */
-	Spreadsheet.prototype.dirtyCheck = function dirtyCheck(sheetToken) {
+	Spreadsheet.prototype.dirtyCheck = function dirtyCheck() {
 		var _this = this;
-		var url = "https://spreadsheets.google.com/feeds/list/" + sheetToken + "/od6/public/values?alt=json";
 		var dff = $.Deferred();
 
 		var ajaxPromise = $.ajax({
-			url: url,
+			url: this.url(),
 			type: 'HEAD'
 		});
 
 		ajaxPromise.then(function onSuccess(data, textStatus, request) {
-			if (typeof _this.timestamps[sheetToken] === 'undefined' || _this.timestamps[sheetToken] < request.getResponseHeader('last-modified')) {
+			if (!_this.lastModified || _this.lastModified < request.getResponseHeader('last-modified')) {
 				dff.resolve(true);
 			} else {
 				dff.resolve(false);
@@ -59,19 +91,16 @@ MMCLapTimer.Spreadsheet = (function () {
 	};
 
 	/* pobranie jsona z google docs - surowy */
-	Spreadsheet.prototype.getJSON = function(sheetToken) {
+	Spreadsheet.prototype.getJSON = function() {
 		var _this = this;
-		var url = "https://spreadsheets.google.com/feeds/list/" + sheetToken + "/od6/public/values?alt=json";
 		var dff = $.Deferred();
 
-		var ajaxPromise = $.ajax(
-			{
-				url: url
-			}
-		);
+		var ajaxPromise = $.ajax({
+			url: this.url()
+		});
 
 		ajaxPromise.then(function(data, textStatus, request) {
-			_this.timestamps[sheetToken] = request.getResponseHeader('last-modified');
+			_this.lastModified = request.getResponseHeader('last-modified');
 			dff.resolve(data.feed.entry);
 
 		}, function(error) {
@@ -81,48 +110,61 @@ MMCLapTimer.Spreadsheet = (function () {
 		return dff.promise();
 	};
 
-	/* pobieranie arkusza konfiguracji */
-	Spreadsheet.prototype.refreshConfig = function(data) {
-		var _this = this;
+	Spreadsheet.prototype.destroy = function() {
 
-		_this.getJSON(_this.configSheet).done(function(data) {
+	}
 
-			_this.config = _this.normalizeConfig(data);
-			console.log(_this.config);
-			_this.refreshData();
-		});
-	};
+	return Spreadsheet;
+})();
 
-	/* normalizacja konfiguracji */
-	Spreadsheet.prototype.normalizeConfig = function(json) {
 
-		var _config = {
-			sheetRace: json[0].gsx$sheetrace.$t,
+MMCLapTimer.ConfigSpreadsheet = (function() {
+	var ConfigSpreadsheet = function() {
+		MMCLapTimer.Spreadsheet.apply(this, arguments);
+	}
+	$.extend(ConfigSpreadsheet.prototype, MMCLapTimer.Spreadsheet.prototype);
+
+	ConfigSpreadsheet.prototype.normalize = function(json) {
+		var data = {
+			sheetRace: [],
 			sheetPractice: [],
-			lapsPractice: json[0].gsx$lapspractice.$t,
-			lapsRace: json[0].gsx$lapsrace.$t,
 			lapsRaceCount: json[0].gsx$lapsracecount.$t
 		};
-
 		$(json).each(function() {
-			_config.sheetPractice.push(this.gsx$sheetpractice.$t);
+			if (this.gsx$sheetrace.$t) {
+				data.sheetRace.push(this.gsx$sheetrace.$t);
+			}
 		});
-
-		return _config;
+		$(json).each(function() {
+			if (this.gsx$sheetpractice.$t) {
+				data.sheetPractice.push(this.gsx$sheetpractice.$t);
+			}
+		});
+		return data;
 	};
 
-	/* normalizacja surowego jsona do czytelnego formatu */
-	Spreadsheet.prototype.normalizeResults = function(json) {
+	return ConfigSpreadsheet;
+})();
+
+MMCLapTimer.ResultsSpreadsheet = (function() {
+	var ResultsSpreadsheet = function() {
+		MMCLapTimer.Spreadsheet.apply(this, arguments);
+	}
+	$.extend(ResultsSpreadsheet.prototype, MMCLapTimer.Spreadsheet.prototype);
+
+	ResultsSpreadsheet.prototype.normalize = function(json) {
 
 		/* wyciaga z jsona czasy kolek i tworzy oddzielna tablice */
 		this.getTimes = function(object) {
 
-			var times = new Array();
+			var times = [];
 
 			/* po kolei kazde kolko z limitem prob ustalonym na konstruktorze this.runs */
-			for (i = 0; i < this.config.lapsPractice; i++) {
-				var j = i + 1,
-					time = eval('object.gsx$pomiar' + j).$t.trim();
+			for (i = 1; i < 100; i++) {
+				if (object['gsx$pomiar' + i] === undefined) {
+					break;
+				}
+				var time = object['gsx$pomiar' + i].$t.trim();
 
 				if (time.toLowerCase() == 'x') {
 					/* jezeli czas jest rowny x to wstawia null */
@@ -156,40 +198,5 @@ MMCLapTimer.Spreadsheet = (function () {
 		return this.generateJson();
 	};
 
-	/* metoda do pobierania nowych danych z api */
-	Spreadsheet.prototype.refreshData = function() {
-		var _this = this;
-
-		_this.getJSON(_this.config.sheetPractice[0]).done(function(data) {
-			_this.results = _this.normalizeResults(data);
-			_this.triggerComplete();
-		});
-
-
-	};
-
-	Spreadsheet.prototype.destroy = function() {
-
-	}
-
-	/* metoda do odsiwezania widoku */
-	Spreadsheet.prototype.triggerComplete = function() {
-		$('body').addClass('ready'); // dodaje do body klase, po to, aby dopiero wyswietlic strone po zaladowaniu rezultatow - preloader
-
-		/* miejsce na czary zwiazane z renderem widoku */
-		console.log(this.results);
-
-
-		if (window.trackday) {
-			window.trackday.destroy();
-		}
-
-		window.trackday = new MMCLapTimer.Trackday({
-			container: $('.trackday:first')
-		}).load(this.results).draw();
-
-		MMCLapTimer.loader.hide();
-	};
-
-	return Spreadsheet;
+	return ResultsSpreadsheet;
 })();
