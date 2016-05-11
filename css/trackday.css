@@ -1,5 +1,12 @@
 .session {
 	font-size: 50px;
+	padding: 0 2% 0 2%;
+	background: #333;
+	overflow: hidden;
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 	.session .ranking {
@@ -14,10 +21,12 @@
 		height: 100%;
 	}
 		.session .ranking .category {
-			line-height: 1.8em;
+			line-height: 2em;
 			font-size: 1em;
 			margin: 0;
 			padding: 0;
+			white-space: nowrap;
+			overflow: hidden;
 		}
 
 .driver {

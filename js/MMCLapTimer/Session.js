@@ -4,21 +4,30 @@
  *  container
  * 	results
  * 	name
+ * 	trackday
  */
 MMCLapTimer.Session = (function(options) {
 	var Session = function(options) {
 		this.rankings = [];
 		this.categories = {};
-		this.container = null;
-		if (options.container) {
-			this.container = options.container;
-		}
-		if (options.name) {
-			this.name = options.name;
-		}
+		this.trackday = options.trackday;
+		this.container = options.container || null;
+		this.name = options.name || '';
 		if (options.results) {
 			this.load(options.results);
 		}
+	}
+
+	Session.prototype.unload = function() {
+		var ranking, category;
+		for (category in this.categories) {
+			this.categories[category].destroy();
+		}
+		for (ranking = 0; ranking < this.rankings.length; ranking++) {
+			this.rankings[ranking].destroy();
+			delete this.rankings[ranking];
+		}
+		return this;
 	}
 
 	Session.prototype.name = '';
@@ -30,17 +39,17 @@ MMCLapTimer.Session = (function(options) {
 	 * Replaces all results with a new set.
 	 * Removes all previous data and redraws all related views.
 	 * @param results
-	 * @return this Methods chaning.
+	 * @return this Methods chaining.
 	 */
 	Session.prototype.load = function(results) {
 		var category, categorizedResults;
-		this.reset();
+		this.unload();
 		categorizedResults = this.categorizedResults(results);
 		for (category in categorizedResults) {
 			this.rankings.push(
 				this.categories[category] = new MMCLapTimer.Ranking(categorizedResults[category], {
-					category: category,
-					container: $('.templates .ranking.practice.category-' + category).first().clone()
+					session: this,
+					category: category
 				})
 			);
 		}
@@ -53,7 +62,7 @@ MMCLapTimer.Session = (function(options) {
 	/**
 	 * Adds new laptimes.
 	 * @param {Array} results Results from Collector.
-	 * @return this Methods chaning.
+	 * @return this Methods chaining.
 	 */
 	Session.prototype.appendResults = function(results) {
 		return this;
@@ -88,7 +97,7 @@ MMCLapTimer.Session = (function(options) {
 	Session.prototype.draw = function() {
 		var i;
 		if (!this.container) {
-			this.container = $('<div class="session">');
+			this.container = $('.templates .session.' + this.name).first().clone();
 		}
 		for (i = 0; i < this.rankings.length; i++) {
 			this.rankings[i].draw();
@@ -122,19 +131,8 @@ MMCLapTimer.Session = (function(options) {
 		return this;
 	}
 
-	Session.prototype.reset = function() {
-		var i, category;
-		for (category in this.categories) {
-			this.categories[category].destroy();
-		}
-		for (i = 0; i < this.rankings.length; i++) {
-			this.rankings[i].destroy();
-			delete this.rankings[i];
-		}
-	}
-
 	Session.prototype.destroy = function() {
-		this.reset();
+		this.unload();
 		if (this.container) {
 			this.container.remove();
 		}

@@ -4,31 +4,52 @@
 	<meta charset="UTF-8">
 	<title>MiniMiataChallenge</title>
 	<link href="./css/layout.css" rel="stylesheet" type="text/css" />
+	<link href="./css/loader.css" rel="stylesheet" type="text/css" />
 	<link href="./css/trackday.css" rel="stylesheet" type="text/css" />
 
 	<script src="http://code.jquery.com/jquery.min.js"></script>
 	<script src="./js/config.js"></script>
 	<script src="./js/MMCLapTimer.js"></script>
 	<script src="./js/loader.js"></script>
-	<script src="./js/Driver.js"></script>
-	<script src="./js/Ranking.js"></script>
-	<script src="./js/Spreadsheet.js"></script>
-	<script src="./js/Renderer.js"></script>
-	<script src="./js/Session.js"></script>
-	<script src="./js/Trackday.js"></script>
+	<script src="./js/MMCLapTimer/Driver.js"></script>
+	<script src="./js/MMCLapTimer/Ranking.js"></script>
+	<script src="./js/MMCLapTimer/Spreadsheet.js"></script>
+	<script src="./js/MMCLapTimer/Spreadsheet/Config.js"></script>
+	<script src="./js/MMCLapTimer/Spreadsheet/Results.js"></script>
+	<script src="./js/MMCLapTimer/Renderer.js"></script>
+	<script src="./js/MMCLapTimer/Session.js"></script>
+	<script src="./js/MMCLapTimer/Session/Practice.js"></script>
+	<script src="./js/MMCLapTimer/Session/Rallysprint.js"></script>
+	<script src="./js/MMCLapTimer/Trackday.js"></script>
 
 	<script>
-		jQuery(function($) {
-			var ulez = new MMCLapTimer.Trackday({
+		function showTrackday(sessionName) {
+			new MMCLapTimer.Trackday({
 				container: $('.trackday:first'),
-				config: config.configSheet
+				config: location.search.replace(/.*trackday=([^\&\#]*)/, '$1') || config.configSheet,
+				sessionName: sessionName
 			});
+		}
 
+		jQuery(function($) {
+			$('.sessionSelection a[href]').click(function() {
+				showTrackday($(this).attr('name'));
+				$(this).closest('.sessionSelection').remove();
+				MMCLapTimer.loader.show();
+				return false;
+			});
 			//var ulez = new MMCLapTimer.Spreadsheet();
 		});
 	</script>
 </head>
 <body>
+	<div class="sessionSelection">
+		<h3>Wybierz sesję</h3>
+		<a href="#practice" name="practice">Trening</a>
+		<br />
+		<a href="#rallysprint" name="rallysprint">Rallysprint</a>
+	</div>
+
 	<div class="trackdays">
 		<div class="trackday"></div>
 	</div>
@@ -43,6 +64,22 @@
 	</div>
 
 	<div class="templates">
+		<div class="session practice">
+		</div>
+
+		<div class="ranking practice category-1">
+			<h2 class="category">Trening: geje</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking practice category-2">
+			<h2 class="category">Trening: fryzjerzy</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking practice category-3">
+			<h2 class="category">Trening: meżczyźni</h2>
+			<div class="standings"></div>
+		</div>
+
 		<div class="driver practice">
 			<div class="position"></div>
 			<div class="number"></div>
@@ -60,6 +97,23 @@
 			</div>
 		</div>
 
+
+		<div class="session rallysprint">
+		</div>
+
+		<div class="ranking rallysprint category-1">
+			<h2 class="category">Rallysprint: geje</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking rallysprint category-2">
+			<h2 class="category">Rallysprint: fryzjerzy</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking rallysprint category-3">
+			<h2 class="category">Rallysprint: mężczyźni</h2>
+			<div class="standings"></div>
+		</div>
+
 		<div class="driver rallysprint">
 			<div class="position"></div>
 			<div class="number"></div>
@@ -75,21 +129,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="session practice"></div>
-
-		<div class="ranking practice category-1">
-			<h2 class="category">Geje</h2>
-			<div class="standings"></div>
-		</div>
-		<div class="ranking practice category-2">
-			<h2 class="category">Fryzjerzy</h2>
-			<div class="standings"></div>
-		</div>
-		<div class="ranking practice category-3">
-			<h2 class="category">Mężczyźni</h2>
-			<div class="standings"></div>
 		</div>
 	</div>
 

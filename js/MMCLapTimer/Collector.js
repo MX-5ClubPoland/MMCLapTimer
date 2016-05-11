@@ -37,12 +37,12 @@ MMCLapTimer.Collector = (function() {
 		}
 	}
 
-	Collector.prototype.reset = function() {
+	Collector.prototype.unload = function() {
 		return this;
 	};
 
 	Collector.prototype.destroy = function() {
-		this.reset();
+		this.unload();
 		return this;
 	}
 })();

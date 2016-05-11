@@ -3,20 +3,40 @@
  * Options:
  * 	{ConfigSpreadsheet|String} config
  * 	{HTMLElement} container
+ * 	{String} sessionName
  */
 MMCLapTimer.Trackday = (function() {
 	var Trackday = function(options) {
 		options = options || {};
 		this.config = null;
 		this.container = options.container || null;
-
-		if (options.config) {
-			this.load(options.config);
+		this.sessionName = options.sessionName || null;
+		if (!this.sessionClass()) {
+			console.log('Unknown session name.');
+			alert('Nie ma sesji o takiej nazwie.');
+			return false;
 		}
+		this.load(options.config);
 	}
 
-	Trackday.prototype.sessions = {};
-	Trackday.prototype.container = null;
+	Trackday.prototype.sessionClass = function() {
+		switch (this.sessionName) {
+			case 'rallysprint':
+				return MMCLapTimer.Session.Rallysprint;
+			case 'practice':
+				return MMCLapTimer.Session.Practice;
+		}
+		return false;
+	}
+
+	Trackday.prototype.unload = function() {
+		var name;
+		for (name in this.sessions) {
+			this.removeSession(name);
+		}
+		this.sessions = {};
+		return this;
+	}
 
 	Trackday.prototype.load2 = function(singleSessionResults) {
 		var that = this;
@@ -35,16 +55,19 @@ MMCLapTimer.Trackday = (function() {
 	}
 
 	Trackday.prototype.load = function(config) {
-		if (typeof config === 'string') {
-			this.loadByToken(config);
-		} else {
-			this.loadByConfig(config);
+		this.unload();
+		if (config) {
+			if (typeof config === 'string') {
+				this.loadByToken(config);
+			} else {
+				this.loadByConfig(config);
+			}
 		}
 	}
 
 	Trackday.prototype.loadByToken = function(configToken) {
 		var that = this;
-		new MMCLapTimer.ConfigSpreadsheet(configToken, {
+		new MMCLapTimer.Spreadsheet.Config(configToken, {
 			complete:function() {
 				this.data.spreadsheet = this;
 				that.loadByConfig(this.data);
@@ -54,32 +77,49 @@ MMCLapTimer.Trackday = (function() {
 	}
 
 	Trackday.prototype.loadByConfig = function(config) {
-		this.reset();
+		this.unload();
 		this.config = config;
 		this.loadResults();
 	}
 
 	Trackday.prototype.loadResults = function() {
-		var that = this;
-		new MMCLapTimer.ResultsSpreadsheet(this.config.sheetPractice[0], {
-			complete:function() {
-				that.sessions.practice = new MMCLapTimer.Session({
-					container: $('.templates .session.practice').first().clone(),
-					results: this.data
-				});
-				MMCLapTimer.loader.hide();
-				that.draw();
+		var i,
+			that = this,
+			session = this.addSession(this.sessionName);
+		for (i = 0; i < 1/*this.config.sessions[name].length*/; i++) {
+			if (!session.spreadsheets) {
+				session.spreadsheets = [];
 			}
-		});
+			session.spreadsheets.push(new MMCLapTimer.Spreadsheet.Results(this.config.sessions[session.name][i], {
+				complete: function() {
+					this.session.load(this.data);
+					MMCLapTimer.loader.hide();
+					that.draw();
+				}
+			}));
+			//console.log(this.sessions[name].spreadsheets[i])
+			session.spreadsheets[i].session = session;
+		}
+		//this.sessions[session].observe(10);
 		return this;
 	}
 
 	Trackday.prototype.addSession = function(name, results) {
-		this.sessions.practice = new MMCLapTimer.Session({
+		return this.sessions[name] = new (this.sessionClass())({
+			trackday: this,
 			name: name,
 			results: results
 		});
 	}
+
+	Trackday.prototype.removeSession = function(name) {
+		if (this.sessions[name]) {
+			this.sessions[name].destroy();
+			delete this.sessions[name];
+		}
+		return this;
+	}
+
 
 	Trackday.prototype.draw = function() {
 		var s;
@@ -92,22 +132,12 @@ MMCLapTimer.Trackday = (function() {
 		return this;
 	}
 
-	Trackday.prototype.reset = function() {
-		var s;
-		for (s in this.sessions) {
-			this.sessions[s].destroy();
-		}
-		this.sessions = {}
-		return this;
-	}
-
 	Trackday.prototype.destroy = function() {
-		this.reset();
+		this.unload();
 		if (this.container) {
 			this.container.remove();
 		}
 		this.container = null;
-
 		this.config = null;
 		return this;
 	}

@@ -35,7 +35,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		var that = this;
 		this.dirtyCheck().done(function(isChanged) {
 			if (isChanged) {
-				that.load();
+				that.load(complete);
 			}
 		});
 		return this;
@@ -117,86 +117,3 @@ MMCLapTimer.Spreadsheet = (function () {
 	return Spreadsheet;
 })();
 
-
-MMCLapTimer.ConfigSpreadsheet = (function() {
-	var ConfigSpreadsheet = function() {
-		MMCLapTimer.Spreadsheet.apply(this, arguments);
-	}
-	$.extend(ConfigSpreadsheet.prototype, MMCLapTimer.Spreadsheet.prototype);
-
-	ConfigSpreadsheet.prototype.normalize = function(json) {
-		var data = {
-			sheetRace: [],
-			sheetPractice: [],
-			lapsRaceCount: json[0].gsx$lapsracecount.$t
-		};
-		$(json).each(function() {
-			if (this.gsx$sheetrace.$t) {
-				data.sheetRace.push(this.gsx$sheetrace.$t);
-			}
-		});
-		$(json).each(function() {
-			if (this.gsx$sheetpractice.$t) {
-				data.sheetPractice.push(this.gsx$sheetpractice.$t);
-			}
-		});
-		return data;
-	};
-
-	return ConfigSpreadsheet;
-})();
-
-MMCLapTimer.ResultsSpreadsheet = (function() {
-	var ResultsSpreadsheet = function() {
-		MMCLapTimer.Spreadsheet.apply(this, arguments);
-	}
-	$.extend(ResultsSpreadsheet.prototype, MMCLapTimer.Spreadsheet.prototype);
-
-	ResultsSpreadsheet.prototype.normalize = function(json) {
-
-		/* wyciaga z jsona czasy kolek i tworzy oddzielna tablice */
-		this.getTimes = function(object) {
-
-			var times = [];
-
-			/* po kolei kazde kolko z limitem prob ustalonym na konstruktorze this.runs */
-			for (i = 1; i < 100; i++) {
-				if (object['gsx$pomiar' + i] === undefined) {
-					break;
-				}
-				var time = object['gsx$pomiar' + i].$t.trim();
-
-				if (time.toLowerCase() == 'x') {
-					/* jezeli czas jest rowny x to wstawia null */
-					times.push(null);
-				} else if (time != '') {
-					times.push(parseFloat(time).toFixed(2));
-				}
-			}
-			return times;
-		};
-
-		/* generujemy docelowy JSON */
-		this.generateJson = function() {
-			var _res = new Array(),
-				_this = this;
-
-			$(json).each(function() {
-				_res.push({
-					number: parseInt(this.gsx$numer.$t),
-					name: this.gsx$imie.$t,
-					nick: this.gsx$nick.$t,
-					model: this.gsx$model.$t,
-					category: parseInt(this.gsx$kategoria.$t),
-					times: _this.getTimes(this)
-				});
-			});
-
-			return _res;
-		};
-
-		return this.generateJson();
-	};
-
-	return ResultsSpreadsheet;
-})();

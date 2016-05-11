@@ -5,32 +5,49 @@
  * Options:
  * 	container
  * 	category
+ * 	{Session} session
  */
 MMCLapTimer.Ranking = (function() {
 	var Ranking = function(results, options) {
-		if (options.category) {
-			this.category = options.category;
-		}
+		options = options || {};
+		this.session = options.session || undefined;
+		this.category = options.category || '';
+		this.showDriverRecursivelyTimeout = null;
 		if (options.container) {
 			this.container = options.container;
 		}
 		this.load(results);
 	}
 
-	Ranking.prototype.container = null;
-	Ranking.prototype.drivers = {};
-	Ranking.prototype.standings = [];
-	Ranking.prototype.category = '';
-	Ranking.prototype.showDriverRecursivelyTimeout = null;
+	Ranking.prototype.unload = function() {
+		var i;
+		clearTimeout(this.showDriverRecursivelyTimeout);
+		if (this.drivers) {
+			for (i in this.drivers) {
+				this.drivers[i].destroy();
+				delete this.drivers[i];
+			}
+		}
+		this.drivers = {};
+		if (this.standings) {
+			while (this.standings.length > 0) {
+				this.standings.shift().destroy();
+			}
+			if (this.standings.container) {
+				this.standings.container.remove();
+				delete this.standings.container;
+			}
+		}
+		this.standings = [];
+		return this;
+	}
 
 	Ranking.prototype.load = function(results) {
 		var r;
-		this.reset();
+		this.unload();
 		for (r = 0; r < results.length; r++) {
 			this.standings.push(
-				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r], {
-					container: $('.templates .driver.practice').first().clone()
-				})
+				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r])
 			);
 		}
 		this.sort();
@@ -111,8 +128,9 @@ MMCLapTimer.Ranking = (function() {
 	Ranking.prototype.draw = function() {
 		var d;
 		if (!this.container) {
-			this.container = $('<div class="ranking">');
+			this.container = $('.templates .ranking.category-' + this.category + (this.session ? '.' + this.session.name : '')).first().clone();
 		}
+
 		if (this.standings.length) {
 			if (!this.standings.container) {
 				this.standings.container = this.container.find('.standings:first').length ? this.container.find('.standings:first') : this.container;
@@ -161,28 +179,8 @@ MMCLapTimer.Ranking = (function() {
 		}
 	}
 
-	Ranking.prototype.reset = function() {
-		var i;
-		clearTimeout(this.showDriverRecursivelyTimeout);
-		for (i in this.drivers) {
-			this.drivers[i].destroy();
-			delete this.drivers[i];
-		}
-		this.drivers = {};
-
-		while (this.standings.length > 0) {
-			this.standings.shift().destroy();
-		}
-		if (this.standings.container) {
-			this.standings.container.remove();
-			delete this.standings.container;
-		}
-		this.standings = [];
-		return this;
-	}
-
 	Ranking.prototype.destroy = function() {
-		this.reset();
+		this.unload();
 		this.category = '';
 		if (this.container) {
 			this.container.remove();

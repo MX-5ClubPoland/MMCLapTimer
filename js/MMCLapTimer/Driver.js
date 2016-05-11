@@ -4,41 +4,41 @@
  * 	container
  */
 MMCLapTimer.Driver = (function() {
-	var fields = ['category', 'model', 'name', 'nick', 'number', 'times'];
-
 	var Driver = function(result, options) {
 		options = options || {};
-		if (options.container) {
-			this.container = options.container;
+		this.container = options.container || $('.templates .driver.practice').first().clone();
+		if (result) {
+			this.load(result);
 		}
-		this.init(result);
 	}
 
-	Driver.prototype.category = '';
-	Driver.prototype.model = '';
-	Driver.prototype.name = '';
-	Driver.prototype.nick = '';
-	Driver.prototype.number = '';
-	Driver.prototype.times = [];
-	Driver.prototype.laps = [];
-	Driver.prototype.container = null;
-
-	Driver.prototype.init = function(result) {
-		return this.reset(result);
+	Driver.prototype.unload = function() {
+		this.category = '';
+		this.model = '';
+		this.name = '';
+		this.nick = '';
+		this.number = '';
+		this.times = [];
+		this.laps = [];
+		return this;
 	}
 
-	Driver.prototype.update = function(result) {
-		var i;
-		for (i in result) {
-			if (fields.indexOf(i) > 0) {
-				this[i] = result[i];
-			}
-		}
-		if (this.times.length) {
+	Driver.prototype.load = function(result) {
+		var i, time;
+		this.unload();
+		if (result.category) this.category = result.category;
+		if (result.model) this.model = result.model;
+		if (result.name) this.name = result.name;
+		if (result.nick) this.nick = result.nick;
+		if (result.number) this.number = result.number;
+		if (result.times && result.times.length) {
 			for (i in result.times) {
-				this.times.push(this.laps[i] = parseFloat(this.times[i]));
+				time = parseFloat(result.times[i]);
+				this.times.push(time);
+				this.laps.push(time);
 			}
 			this.times.sort();
+			//console.log(this.nick, this.laps)
 		}
 		return this;
 	}
@@ -120,22 +120,8 @@ MMCLapTimer.Driver = (function() {
 		return this;
 	}
 
-	Driver.prototype.reset = function(result) {
-		this.category = '';
-		this.model = '';
-		this.name = '';
-		this.nick = '';
-		this.number = '';
-		this.times = [];
-		this.laps = [];
-		if (result) {
-			this.update(result);
-		}
-		return this;
-	}
-
 	Driver.prototype.destroy = function() {
-		this.reset();
+		this.unload();
 		if (this.container) {
 			this.container.remove();
 		}
