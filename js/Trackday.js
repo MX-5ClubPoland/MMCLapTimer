@@ -5,9 +5,23 @@
  */
 MMCLapTimer.Trackday = (function() {
 	var Trackday = function(options) {
+		var that = this;
 		if (options.container) {
 			this.container = options.container;
 		}
+
+		//this.collector = new MMCLapTimer.Collector();
+		//// download config
+		//config = new Spreadsheet(config);
+		//// download results x3
+		//for (i in config.practiceSpreadsheets) {
+		//	this.collector.enqueue(config.practiceSpreadsheets[i]);
+		//}
+		//this.collector.iterate(3, function(results) {
+		//	that.load(results);
+		//});
+		//// register obeserver
+		//this.collector.enqueue()
 	}
 
 	Trackday.prototype.sessions = {};
