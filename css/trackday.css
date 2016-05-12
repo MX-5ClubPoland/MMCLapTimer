@@ -95,7 +95,8 @@
 				z-index: 1;
 				width: 100%;
 			}
-			.driver .laps .personalFastest {
+			.driver .laps .personalFastest,
+			.driver .laps .personalAverage {
 				position: absolute;
 				background-color: #233854;
 				width: 80%;
@@ -103,14 +104,22 @@
 				z-index: 3;
 				overflow: hidden;
 			}
-			.driver .laps .personalFastest.generalFastest {
+
+			.driver .laps .personalAverage i {
+				opacity: 0.2;
+			}
+
+			.driver .laps .personalFastest.generalFastest,
+			.driver .laps .personalAverage.generalFastest {
 				background-color: #870079;
 			}
-				.driver .laps .personalFastest .nick {
+				.driver .laps .personalFastest .nick,
+				.driver .laps .personalAverage .nick {
 					width: auto;
 					z-index: 1;
 					overflow: hidden;
 				}
+				.driver .laps .personalAverage .time,
 				.driver .laps .personalFastest .time {
 					position: absolute;
 					z-index: 2;
@@ -119,6 +128,7 @@
 					padding-left: 0.4em;
 					background-color: #233854;
 				}
+				.driver .laps .personalAverage.generalFastest .time,
 				.driver .laps .personalFastest.generalFastest .time {
 					background-color: #870079;
 				}

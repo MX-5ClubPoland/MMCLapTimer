@@ -8,7 +8,7 @@
  * 	{Session} session
  */
 MMCLapTimer.Ranking = (function() {
-	var Ranking = function(results, options) {
+	var Ranking = function Ranking(results, options) {
 		options = options || {};
 		this.session = options.session || undefined;
 		this.category = options.category || '';
@@ -18,6 +18,8 @@ MMCLapTimer.Ranking = (function() {
 		}
 		this.load(results);
 	}
+
+	Ranking.prototype.driverClass = MMCLapTimer.Driver;
 
 	Ranking.prototype.unload = function() {
 		var i;
@@ -56,7 +58,9 @@ MMCLapTimer.Ranking = (function() {
 				this.drivers[index].update(results[r]);
 			} else {
 				this.standings.push(
-					this.drivers[index] = new MMCLapTimer.Driver(results[r])
+					this.drivers[index] = new (this.driverClass)(results[r], {
+						ranking: this
+					})
 				);
 			}
 		}

@@ -2,11 +2,13 @@
  * @constructor
  * Options:
  * 	container
+ * 	{Ranking} ranking
  */
 MMCLapTimer.Driver = (function() {
 	var Driver = function(results, options) {
 		options = options || {};
-		this.container = options.container || $('.templates .driver.practice').first().clone();
+		this.ranking = options.ranking || undefined;
+		this.container = options.container || $('.templates .driver').first().clone();
 		if (results) {
 			this.load(results);
 		}
@@ -79,15 +81,7 @@ MMCLapTimer.Driver = (function() {
 	 * @returns {Array}
 	 */
 	Driver.prototype.topNTimes = function(n) {
-		var times = [];
-		if (this.times.length) {
-			times = this.times;
-			times.sort();
-			if (times.length > n) {
-				return times.slice(n * -1);
-			}
-		}
-		return times;
+		return this.times.slice(n - 1);
 	}
 
 	Driver.prototype.draw = function() {
@@ -101,10 +95,10 @@ MMCLapTimer.Driver = (function() {
 			this.container.find('.nick.bar').remove();
 		}
 		this.container.find('.nick').text(this.nick);
-		this.container.find('.personalFastest')
+		this.container.find('.personalFastest.bar')
 			.toggle(!!fastestLap)
 			.find('.time').text(this.formatLaptime(fastestLap));
-		this.container.find('.personalLast')
+		this.container.find('.personalLast.bar')
 			.toggle(!!lastLap)
 			.find('.time').text(this.formatLaptime(lastLap));
 		return this;

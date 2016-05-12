@@ -1,8 +1,7 @@
-MMCLapTimer.Session.Practice = (function() {
-	var Practice = function() {
-		MMCLapTimer.Session.apply(this, arguments);
-	}
-	$.extend(Practice.prototype, MMCLapTimer.Session.prototype);
+MMCLapTimer.Session.Practice = MMCLapTimer.Session.extend((function() {
+	var Session = function PracticeSession(options) {}
 
-	return Practice;
-})();
+	Session.prototype.rankingClass = MMCLapTimer.Ranking.Practice;
+
+	return Session;
+})());

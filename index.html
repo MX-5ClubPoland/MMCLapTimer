@@ -9,11 +9,16 @@
 	<link href="./css/trackday.css" rel="stylesheet" type="text/css" />
 
 	<script src="http://code.jquery.com/jquery.min.js"></script>
+	<script src="./js/classes.js"></script>
 	<script src="./js/config.js"></script>
 	<script src="./js/MMCLapTimer.js"></script>
 	<script src="./js/loader.js"></script>
 	<script src="./js/MMCLapTimer/Driver.js"></script>
+	<script src="./js/MMCLapTimer/Driver/Practice.js"></script>
+	<script src="./js/MMCLapTimer/Driver/Rallysprint.js"></script>
 	<script src="./js/MMCLapTimer/Ranking.js"></script>
+	<script src="./js/MMCLapTimer/Ranking/Practice.js"></script>
+	<script src="./js/MMCLapTimer/Ranking/Rallysprint.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet/Config.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet/Results.js"></script>
@@ -49,7 +54,8 @@
 		}
 
 		jQuery(function($) {
-			openSession(new Date().getHours() < 14 ? 'practice' : 'rallysprint');
+//			openSession(new Date().getHours() < 14 ? 'practice' : 'rallysprint');
+//			openSession('practice');
 		});
 	</script>
 </head>
@@ -139,12 +145,13 @@
 			<div class="laps">
 				<div class="layer">
 					<div class="nick bar"></div>
-					<div class="personalFastest bar">
+					<div class="personalAverage bar">
 						<div class="nick"></div>
 						<div class="time"></div>
 					</div>
-					<div class="personalLast bar">
-						<div class="time"></div>
+				</div>
+				<div class="layer">
+					<div class="personalTopLaps bar">
 					</div>
 				</div>
 			</div>

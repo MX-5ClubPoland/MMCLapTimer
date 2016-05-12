@@ -3,7 +3,7 @@
  * @params {String} token
  * @params {Object} options
  * Options:
- * 	function complete function(isChanged) {...}
+ * 	function complete function(data) {...}
  * 	{Session} session
  */
 MMCLapTimer.Spreadsheet = (function () {
@@ -14,7 +14,6 @@ MMCLapTimer.Spreadsheet = (function () {
 		options = options || {};
 		this.lastModified = null;
 		this.token = token;
-		this.data = {};
 		this.session = options.session || null;
 
 		if (this.token && options.complete) {
@@ -29,9 +28,8 @@ MMCLapTimer.Spreadsheet = (function () {
 	Spreadsheet.prototype.load = function(complete) {
 		var that = this;
 		this.getJSON(this.token).done(function(data) {
-			that.data = that.normalize(data);
 			if (typeof complete === 'function') {
-				complete.call(that, true);
+				complete.call(that, that.normalize(data));
 			}
 		});
 		return this;
@@ -43,7 +41,7 @@ MMCLapTimer.Spreadsheet = (function () {
 			if (isChanged) {
 				that.load(complete);
 			} else if (typeof complete === 'function') {
-				complete.call(that, false);
+				complete.call(that);
 			}
 		});
 		return this;
@@ -118,10 +116,6 @@ MMCLapTimer.Spreadsheet = (function () {
 		return dff.promise();
 	};
 
-	Spreadsheet.prototype.getData = function() {
-		return this.data;
-	}
-
 	Spreadsheet.prototype.destroy = function() {
 		if (typeof headersRequest !== 'undefined' && typeof headersRequest.abort === 'function') {
 			headersRequest.abort();
@@ -129,7 +123,6 @@ MMCLapTimer.Spreadsheet = (function () {
 		if (typeof spreadsheetRequest !== 'undefined' && typeof spreadsheetRequest.abort === 'function') {
 			spreadsheetRequest.abort();
 		}
-		delete this.data;
 		delete this.session;
 	}
 

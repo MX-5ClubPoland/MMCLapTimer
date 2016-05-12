@@ -55,9 +55,8 @@ MMCLapTimer.Trackday = (function() {
 	Trackday.prototype.loadByToken = function(configToken) {
 		var that = this;
 		new MMCLapTimer.Spreadsheet.Config(configToken, {
-			complete:function() {
-				this.data.spreadsheet = this;
-				that.loadByConfig(this.data);
+			complete:function(results) {
+				that.loadByConfig(results);
 			}
 		});
 		return this;

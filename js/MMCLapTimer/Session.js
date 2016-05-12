@@ -22,15 +22,20 @@ MMCLapTimer.Session = (function() {
 		}
 	}
 
+	Session.prototype.rankingClass = MMCLapTimer.Ranking;
+
 	Session.prototype.unload = function() {
 		var ranking, category;
 		for (category in this.categories) {
 			this.categories[category].destroy();
+			delete this.categories[category];
 		}
+		this.categories = {};
 		for (ranking = 0; ranking < this.rankings.length; ranking++) {
 			this.rankings[ranking].destroy();
 			delete this.rankings[ranking];
 		}
+		this.rankings = [];
 		return this;
 	}
 
@@ -53,23 +58,33 @@ MMCLapTimer.Session = (function() {
 	Session.prototype.reloadSpreadsheetsRecursively = function(s) {
 		var that = this, spreadsheet = this.spreadsheets[s];
 		if (spreadsheet) {
-			console.log('reload', s);
-			spreadsheet.reload(function(isChanged) {
-				if (isChanged) {
-					console.log('changed', s);
-					that.isDrawn = false;
-					that.appendResults(this.data);
+			//console.log('reload', s);
+			spreadsheet.reload(function(results) {
+				if (results) {
+					//console.log('changed', s);
+					if (!that.newResults) {
+						that.newResults = [];
+					}
+					that.newResults.push(results);
 				}
 				that.reloadSpreadsheetsRecursively(s + 1);
 			});
 		} else if (s > 0) {
-			console.log('all reloaded');
+			//console.log('all reloaded');
 			this.allSpreadsheetsLoaded();
 		}
 	}
 
 	Session.prototype.allSpreadsheetsLoaded = function() {
 		var i, that = this;
+		if (this.newResults) {
+			this.unload();
+			for (i = 0; i < this.newResults.length; i++) {
+				this.appendResults(this.newResults[i]);
+			}
+			this.isDrawn = false;
+			delete this.newResults;
+		}
 		MMCLapTimer.loader.hide();
 		this.draw();
 		this.reloadTimeout = setTimeout(function() {
@@ -90,7 +105,7 @@ MMCLapTimer.Session = (function() {
 				this.categories[category].appendResults(categorizedResults[category]);
 			} else {
 				this.rankings.push(
-					this.categories[category] = new MMCLapTimer.Ranking(categorizedResults[category], {
+					this.categories[category] = new (this.rankingClass)(categorizedResults[category], {
 						session: this,
 						category: category
 					})
@@ -138,7 +153,7 @@ MMCLapTimer.Session = (function() {
 	}
 
 	Session.prototype.redraw = function() {
-		console.log('redraw');
+		//console.log('redraw');
 		var i;
 		if (!this.container) {
 			this.container = $('.templates .session.' + this.name).first().clone();
