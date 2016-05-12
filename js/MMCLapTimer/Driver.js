@@ -4,11 +4,11 @@
  * 	container
  */
 MMCLapTimer.Driver = (function() {
-	var Driver = function(result, options) {
+	var Driver = function(results, options) {
 		options = options || {};
 		this.container = options.container || $('.templates .driver.practice').first().clone();
-		if (result) {
-			this.load(result);
+		if (results) {
+			this.load(results);
 		}
 	}
 
@@ -23,17 +23,22 @@ MMCLapTimer.Driver = (function() {
 		return this;
 	}
 
-	Driver.prototype.load = function(result) {
-		var i, time;
+	Driver.prototype.load = function(results) {
 		this.unload();
-		if (result.category) this.category = result.category;
-		if (result.model) this.model = result.model;
-		if (result.name) this.name = result.name;
-		if (result.nick) this.nick = result.nick;
-		if (result.number) this.number = result.number;
-		if (result.times && result.times.length) {
-			for (i in result.times) {
-				time = parseFloat(result.times[i]);
+		if (results.category) this.category = results.category;
+		if (results.number) this.number = results.number;
+		this.update(results);
+		return this;
+	}
+
+	Driver.prototype.update = function(results) {
+		var i, time;
+		if (results.model) this.model = results.model;
+		if (results.name) this.name = results.name;
+		if (results.nick) this.nick = results.nick;
+		if (results.times && results.times.length) {
+			for (i in results.times) {
+				time = parseFloat(results.times[i]);
 				this.times.push(time);
 				this.laps.push(time);
 			}

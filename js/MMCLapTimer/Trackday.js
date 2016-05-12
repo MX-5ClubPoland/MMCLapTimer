@@ -86,20 +86,21 @@ MMCLapTimer.Trackday = (function() {
 		var i,
 			that = this,
 			session = this.addSession(this.sessionName);
-		for (i = 0; i < 1/*this.config.sessions[name].length*/; i++) {
-			if (!session.spreadsheets) {
-				session.spreadsheets = [];
-			}
+		for (i = 0; i < this.config.sessions[session.name].length; i++) {
 			session.spreadsheets.push(new MMCLapTimer.Spreadsheet.Results(this.config.sessions[session.name][i], {
-				complete: function() {
-					this.session.load(this.data);
-					MMCLapTimer.loader.hide();
-					that.draw();
-				}
-			}));
-			//console.log(this.sessions[name].spreadsheets[i])
-			session.spreadsheets[i].session = session;
+				session: session
+			}).reload());
 		}
+
+		MMCLapTimer.loader.show();
+		setTimeout(function() {
+			var i;
+			for (i = 0; i < session.spreadsheets.length; i++) {
+				session.appendResults(session.spreadsheets[i].data);
+			}
+			MMCLapTimer.loader.hide();
+			that.draw();
+		}, 3000);
 		//this.sessions[session].observe(10);
 		return this;
 	}

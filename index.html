@@ -5,6 +5,7 @@
 	<title>MiniMiataChallenge</title>
 	<link href="./css/layout.css" rel="stylesheet" type="text/css" />
 	<link href="./css/loader.css" rel="stylesheet" type="text/css" />
+	<link href="./css/typo.css" rel="stylesheet" type="text/css" />
 	<link href="./css/trackday.css" rel="stylesheet" type="text/css" />
 
 	<script src="http://code.jquery.com/jquery.min.js"></script>
@@ -23,36 +24,50 @@
 	<script src="./js/MMCLapTimer/Trackday.js"></script>
 
 	<script>
-		function showTrackday(sessionName) {
-			new MMCLapTimer.Trackday({
-				container: $('.trackday:first'),
+		function openTrackday(sessionName) {
+			return new MMCLapTimer.Trackday({
+				container: $('.trackday:first').clone().appendTo('.trackdays'),
 				config: location.search.replace(/.*trackday=([^\&\#]*)/, '$1') || config.configSheet,
 				sessionName: sessionName
 			});
 		}
 
+		function openSession(name) {
+			$('.sessionSelection').hide();
+			MMCLapTimer.trackday = openTrackday(name);
+			return false;
+		}
+
+		function closeTrackday() {
+			if (MMCLapTimer.trackday) {
+				MMCLapTimer.trackday.destroy();
+			}
+			$('.sessionSelection').show();
+			return false;
+		}
+
 		jQuery(function($) {
-			$('.sessionSelection a[href]').click(function() {
-				showTrackday($(this).attr('name'));
-				$(this).closest('.sessionSelection').remove();
-				MMCLapTimer.loader.show();
-				return false;
-			});
-			//var ulez = new MMCLapTimer.Spreadsheet();
+			openSession(new Date().getHours() < 14 ? 'practice' : 'rallysprint');
 		});
 	</script>
 </head>
 <body>
-	<div class="sessionSelection">
-		<h3>Wybierz sesję</h3>
-		<a href="#practice" name="practice">Trening</a>
-		<br />
-		<a href="#rallysprint" name="rallysprint">Rallysprint</a>
-	</div>
-
 	<div class="trackdays">
 		<div class="trackday"></div>
 	</div>
+
+	<div class="centerWH">
+		<div class="sessionSelection">
+			<img src="./images/miniMiataChallengeLogo.png" alt="miniMiataChallenge" />
+			<p>
+				<a href="#practice" name="practice" onclick="return openSession('practice')">Trening</a>
+				<br />
+				<a href="#rallysprint" name="rallysprint" onclick="return openSession('rallysprint')">Rallysprint</a>
+			</p>
+			<img src="./images/mx-5KlubPolskaLogo.png" alt="MX-5 Klub Polska" />
+		</div>
+	</div>
+
 
 	<div id="loadingOverlay">
 		<div id="spinner">
@@ -65,6 +80,7 @@
 
 	<div class="templates">
 		<div class="session practice">
+			<a href="#close" class="closeButton" title="Zamknij sesję" onclick="return closeTrackday();">x</a>
 		</div>
 
 		<div class="ranking practice category-1">
@@ -99,6 +115,7 @@
 
 
 		<div class="session rallysprint">
+			<a href="#close" class="closeButton" title="Zamknij sesję" onclick="return closeTrackday();">x</a>
 		</div>
 
 		<div class="ranking rallysprint category-1">

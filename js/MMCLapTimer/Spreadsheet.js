@@ -1,7 +1,8 @@
 /**
  * @constructor
  * Options:
- * 	complete
+ * 	function complete
+ * 	{Session} session
  */
 MMCLapTimer.Spreadsheet = (function () {
 
@@ -10,6 +11,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		this.lastModified = null;
 		this.token = token;
 		this.data = {};
+		this.session = options.session || null;
 
 		if (this.token && options.complete) {
 			this.load(options.complete);
@@ -109,6 +111,10 @@ MMCLapTimer.Spreadsheet = (function () {
 
 		return dff.promise();
 	};
+
+	Spreadsheet.prototype.getData = function() {
+		return this.data;
+	}
 
 	Spreadsheet.prototype.destroy = function() {
 

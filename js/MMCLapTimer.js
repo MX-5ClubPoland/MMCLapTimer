@@ -1,6 +1,6 @@
 /**
- * MMCLapTimer namespace
- * Options:
- * 	results
+ * @constructor
  */
-var MMCLapTimer = {}
+var MMCLapTimer = {
+	trackday: null
+};

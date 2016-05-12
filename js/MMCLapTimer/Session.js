@@ -5,12 +5,14 @@
  * 	results
  * 	name
  * 	trackday
+ * 	spreadsheets
  */
 MMCLapTimer.Session = (function(options) {
 	var Session = function(options) {
 		this.rankings = [];
 		this.categories = {};
 		this.trackday = options.trackday;
+		this.spreadsheets = options.spreadsheets || [];
 		this.container = options.container || null;
 		this.name = options.name || '';
 		if (options.results) {
@@ -30,11 +32,6 @@ MMCLapTimer.Session = (function(options) {
 		return this;
 	}
 
-	Session.prototype.name = '';
-	Session.prototype.rankings = [];
-	Session.prototype.categories = {};
-	Session.prototype.container = null;
-
 	/**
 	 * Replaces all results with a new set.
 	 * Removes all previous data and redraws all related views.
@@ -42,21 +39,13 @@ MMCLapTimer.Session = (function(options) {
 	 * @return this Methods chaining.
 	 */
 	Session.prototype.load = function(results) {
-		var category, categorizedResults;
 		this.unload();
-		categorizedResults = this.categorizedResults(results);
-		for (category in categorizedResults) {
-			this.rankings.push(
-				this.categories[category] = new MMCLapTimer.Ranking(categorizedResults[category], {
-					session: this,
-					category: category
-				})
-			);
-		}
-		this.rankings.sort(function(a, b) {
-			return b.standings.length - a.standings.length;
-		});
+		this.appendResults(results);
 		return this;
+	}
+
+	Session.prototype.reloadSpreadsheetsRecursively = function() {
+
 	}
 
 	/**
@@ -65,6 +54,23 @@ MMCLapTimer.Session = (function(options) {
 	 * @return this Methods chaining.
 	 */
 	Session.prototype.appendResults = function(results) {
+		var category,
+			categorizedResults = this.categorizedResults(results);
+		for (category in categorizedResults) {
+			if (this.categories[category]) {
+				this.categories[category].appendResults(categorizedResults[category]);
+			} else {
+				this.rankings.push(
+					this.categories[category] = new MMCLapTimer.Ranking(categorizedResults[category], {
+						session: this,
+						category: category
+					})
+				);
+			}
+		}
+		this.rankings.sort(function(a, b) {
+			return b.standings.length - a.standings.length;
+		});
 		return this;
 	}
 
@@ -132,7 +138,13 @@ MMCLapTimer.Session = (function(options) {
 	}
 
 	Session.prototype.destroy = function() {
+		var i;
 		this.unload();
+		for (i = 0; i < this.spreadsheets.length; i++) {
+			this.spreadsheets[i].destroy();
+			delete this.spreadsheets[i];
+		}
+		this.spreadsheets = [];
 		if (this.container) {
 			this.container.remove();
 		}

@@ -43,15 +43,24 @@ MMCLapTimer.Ranking = (function() {
 	}
 
 	Ranking.prototype.load = function(results) {
-		var r;
 		this.unload();
+		this.appendResults(results);
+		return this;
+	}
+
+	Ranking.prototype.appendResults = function(results) {
+		var r, index;
 		for (r = 0; r < results.length; r++) {
-			this.standings.push(
-				this.drivers[results[r].number.toString()] = new MMCLapTimer.Driver(results[r])
-			);
+			index = results[r].number.toString();
+			if (this.drivers[index]) {
+				this.drivers[index].update(results[r]);
+			} else {
+				this.standings.push(
+					this.drivers[index] = new MMCLapTimer.Driver(results[r])
+				);
+			}
 		}
 		this.sort();
-		return this;
 	}
 
 	Ranking.prototype.sort = function() {
