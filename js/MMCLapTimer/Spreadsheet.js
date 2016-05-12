@@ -7,6 +7,8 @@
  * 	{Session} session
  */
 MMCLapTimer.Spreadsheet = (function () {
+	var spreadsheetRequest;
+	var headersRequest;	
 
 	var Spreadsheet = function(token, options) {
 		options = options || {};
@@ -78,12 +80,12 @@ MMCLapTimer.Spreadsheet = (function () {
 		var _this = this;
 		var dff = $.Deferred();
 
-		var ajaxPromise = $.ajax({
+		headersRequest = $.ajax({
 			url: this.url(),
 			type: 'HEAD'
 		});
 
-		ajaxPromise.then(function onSuccess(data, textStatus, request) {
+		headersRequest.then(function onSuccess(data, textStatus, request) {
 			if (!_this.lastModified || _this.lastModified < request.getResponseHeader('last-modified')) {
 				dff.resolve(true);
 			} else {
@@ -101,11 +103,11 @@ MMCLapTimer.Spreadsheet = (function () {
 		var _this = this;
 		var dff = $.Deferred();
 
-		var ajaxPromise = $.ajax({
+		spreadsheetRequest = $.ajax({
 			url: this.url()
 		});
 
-		ajaxPromise.then(function(data, textStatus, request) {
+		spreadsheetRequest.then(function(data, textStatus, request) {
 			_this.lastModified = request.getResponseHeader('last-modified');
 			dff.resolve(data.feed.entry);
 
@@ -121,7 +123,14 @@ MMCLapTimer.Spreadsheet = (function () {
 	}
 
 	Spreadsheet.prototype.destroy = function() {
-
+		if (typeof headersRequest !== 'undefined' && typeof headersRequest.abort === 'function') {
+			headersRequest.abort();
+		}
+		if (typeof spreadsheetRequest !== 'undefined' && typeof spreadsheetRequest.abort === 'function') {
+			spreadsheetRequest.abort();
+		}
+		delete this.data;
+		delete this.session;
 	}
 
 	return Spreadsheet;
