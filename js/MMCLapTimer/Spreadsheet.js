@@ -1,7 +1,9 @@
 /**
  * @constructor
+ * @params {String} token
+ * @params {Object} options
  * Options:
- * 	function complete
+ * 	function complete function(isChanged) {...}
  * 	{Session} session
  */
 MMCLapTimer.Spreadsheet = (function () {
@@ -27,7 +29,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		this.getJSON(this.token).done(function(data) {
 			that.data = that.normalize(data);
 			if (typeof complete === 'function') {
-				complete.call(that);
+				complete.call(that, true);
 			}
 		});
 		return this;
@@ -38,6 +40,8 @@ MMCLapTimer.Spreadsheet = (function () {
 		this.dirtyCheck().done(function(isChanged) {
 			if (isChanged) {
 				that.load(complete);
+			} else if (typeof complete === 'function') {
+				complete.call(that, false);
 			}
 		});
 		return this;

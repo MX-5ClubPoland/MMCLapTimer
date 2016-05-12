@@ -1,13 +1,14 @@
 /**
  * @constructor
+ * @params {Object} options
  * Options:
- *  container
- * 	results
- * 	name
- * 	trackday
- * 	spreadsheets
+ *  {HTMLElement} container
+ * 	{Array} results
+ * 	{String} name
+ * 	{MMCLapTimer.Trackday} trackday
+ * 	{MMCLapTimer.Spreadsheet} spreadsheets
  */
-MMCLapTimer.Session = (function(options) {
+MMCLapTimer.Session = (function() {
 	var Session = function(options) {
 		this.rankings = [];
 		this.categories = {};
@@ -15,6 +16,7 @@ MMCLapTimer.Session = (function(options) {
 		this.spreadsheets = options.spreadsheets || [];
 		this.container = options.container || null;
 		this.name = options.name || '';
+		this.isDrawn = true;
 		if (options.results) {
 			this.load(options.results);
 		}
@@ -44,8 +46,35 @@ MMCLapTimer.Session = (function(options) {
 		return this;
 	}
 
-	Session.prototype.reloadSpreadsheetsRecursively = function() {
+	Session.prototype.reloadSpreadsheets = function() {
+		this.reloadSpreadsheetsRecursively(0);
+	}
 
+	Session.prototype.reloadSpreadsheetsRecursively = function(s) {
+		var that = this, spreadsheet = this.spreadsheets[s];
+		if (spreadsheet) {
+			console.log('reload', s);
+			spreadsheet.reload(function(isChanged) {
+				if (isChanged) {
+					console.log('changed', s);
+					that.isDrawn = false;
+					that.appendResults(this.data);
+				}
+				that.reloadSpreadsheetsRecursively(s + 1);
+			});
+		} else if (s > 0) {
+			console.log('all reloaded');
+			this.allSpreadsheetsLoaded();
+		}
+	}
+
+	Session.prototype.allSpreadsheetsLoaded = function() {
+		var i, that = this;
+		MMCLapTimer.loader.hide();
+		this.draw();
+		this.reloadTimeout = setTimeout(function() {
+			that.reloadSpreadsheets();
+		}, config.refreshTimes.results * 1000);
 	}
 
 	/**
@@ -101,9 +130,21 @@ MMCLapTimer.Session = (function(options) {
 	}
 
 	Session.prototype.draw = function() {
+		if (!this.isDrawn) {
+			this.redraw();
+			this.isDrawn = true;
+		}
+		return this;
+	}
+
+	Session.prototype.redraw = function() {
+		console.log('redraw');
 		var i;
 		if (!this.container) {
 			this.container = $('.templates .session.' + this.name).first().clone();
+			if (this.trackday && this.trackday.container) {
+				this.trackday.container.append(this.container);
+			}
 		}
 		for (i = 0; i < this.rankings.length; i++) {
 			this.rankings[i].draw();
@@ -150,6 +191,8 @@ MMCLapTimer.Session = (function(options) {
 		}
 		this.container = null;
 		this.name = '';
+		this.isDrawn = false;
+		clearTimeout(this.reloadTimeout);
 	}
 
 	return Session;

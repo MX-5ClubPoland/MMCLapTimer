@@ -27,13 +27,14 @@
 		function openTrackday(sessionName) {
 			return new MMCLapTimer.Trackday({
 				container: $('.trackday:first').clone().appendTo('.trackdays'),
-				config: location.search.replace(/.*trackday=([^\&\#]*)/, '$1') || config.configSheet,
+				config: location.search.replace(/\?([^\&\#]*)/, '$1') || config.configSheet,
 				sessionName: sessionName
 			});
 		}
 
 		function openSession(name) {
 			$('.sessionSelection').hide();
+			MMCLapTimer.loader.show();
 			MMCLapTimer.trackday = openTrackday(name);
 			return false;
 		}
@@ -42,6 +43,7 @@
 			if (MMCLapTimer.trackday) {
 				MMCLapTimer.trackday.destroy();
 			}
+			MMCLapTimer.loader.hide();
 			$('.sessionSelection').show();
 			return false;
 		}

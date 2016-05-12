@@ -11,6 +11,8 @@ MMCLapTimer.Trackday = (function() {
 		this.config = null;
 		this.container = options.container || null;
 		this.sessionName = options.sessionName || null;
+		this.isDrawn = false;
+
 		if (!this.sessionClass()) {
 			console.log('Unknown session name.');
 			alert('Nie ma sesji o takiej nazwie.');
@@ -38,22 +40,6 @@ MMCLapTimer.Trackday = (function() {
 		return this;
 	}
 
-	Trackday.prototype.load2 = function(singleSessionResults) {
-		var that = this;
-		this.collector = new MMCLapTimer.Collector();
-		// download config
-		config = new Spreadsheet(config);
-		// download results x3
-		for (i in config.practiceSpreadsheets) {
-			this.collector.enqueue(config.practiceSpreadsheets[i]);
-		}
-		this.collector.iterate(3, function(results) {
-			that.loadByConfig(results);
-		});
-		// register obeserver
-		this.collector.enqueue()
-	}
-
 	Trackday.prototype.load = function(config) {
 		this.unload();
 		if (config) {
@@ -63,6 +49,7 @@ MMCLapTimer.Trackday = (function() {
 				this.loadByConfig(config);
 			}
 		}
+		return this;
 	}
 
 	Trackday.prototype.loadByToken = function(configToken) {
@@ -89,18 +76,11 @@ MMCLapTimer.Trackday = (function() {
 		for (i = 0; i < this.config.sessions[session.name].length; i++) {
 			session.spreadsheets.push(new MMCLapTimer.Spreadsheet.Results(this.config.sessions[session.name][i], {
 				session: session
-			}).reload());
+			}));
 		}
 
-		MMCLapTimer.loader.show();
-		setTimeout(function() {
-			var i;
-			for (i = 0; i < session.spreadsheets.length; i++) {
-				session.appendResults(session.spreadsheets[i].data);
-			}
-			MMCLapTimer.loader.hide();
-			that.draw();
-		}, 3000);
+		this.redraw();
+		session.reloadSpreadsheets();
 		//this.sessions[session].observe(10);
 		return this;
 	}
@@ -123,12 +103,23 @@ MMCLapTimer.Trackday = (function() {
 
 
 	Trackday.prototype.draw = function() {
+		if (!this.isDrawn) {
+			this.redraw();
+			this.isDrawn = true;
+		}
+		return this;
+	}
+
+	Trackday.prototype.redraw = function() {
 		var s;
 		if (!this.container) {
 			this.container = $('<dic class="trackday">');
 		}
 		for (s in this.sessions) {
-			this.sessions[s].draw().container.appendTo(this.container);
+			this.sessions[s].draw();
+			if (this.sessions[s].container) {
+				this.sessions[s].container.appendTo(this.container);
+			}
 		}
 		return this;
 	}
@@ -140,6 +131,7 @@ MMCLapTimer.Trackday = (function() {
 		}
 		this.container = null;
 		this.config = null;
+		this.isDrawn = false;
 		return this;
 	}
 
