@@ -44,8 +44,9 @@ MMCLapTimer.Driver = (function() {
 				this.times.push(time);
 				this.laps.push(time);
 			}
-			this.times.sort();
-			//console.log(this.nick, this.laps)
+			this.times.sort(function(a, b) {
+				return a - b;
+			});
 		}
 		return this;
 	}
@@ -105,7 +106,8 @@ MMCLapTimer.Driver = (function() {
 	}
 
 	Driver.prototype.formatLaptime = function(lap) {
-		return String('000' + Math.floor(lap)).slice(-3) + '.' + String('00' + (lap * 100 % 100)).slice(-2);
+		lap = lap || 0.0;
+		return String('0000000' + lap.toFixed(2)).slice(-6);
 	}
 
 	Driver.prototype.addLap = function(position) {

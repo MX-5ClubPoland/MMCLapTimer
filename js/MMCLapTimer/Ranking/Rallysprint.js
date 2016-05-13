@@ -2,12 +2,18 @@
  * @constructor
  */
 MMCLapTimer.Ranking.Rallysprint = MMCLapTimer.Ranking.extend((function() {
+
 	var Ranking = function RallysprintRanking(results, options) {
 		options = options || [];
-		this.averageLapsCount = options.averageLapsCount || this.session.trackday.config.lapsRaceCount;
+		this._averageLapsCount = options.averageLapsCount || 0;
 	}
 
 	Ranking.prototype.driverClass = MMCLapTimer.Driver.Rallysprint;
+	Ranking.prototype.averageLapsCount = 0;
+
+	Ranking.prototype.averageLapsCount = function() {
+		return this._averageLapsCount || this.session.trackday.config.lapsRaceCount;
+	};
 
 	Ranking.prototype.compareDrivers = function(driverA, driverB) {
 		if (!driverA.times.length && !driverB.times.length) {

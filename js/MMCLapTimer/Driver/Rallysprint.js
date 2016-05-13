@@ -9,7 +9,7 @@ MMCLapTimer.Driver.Rallysprint = MMCLapTimer.Driver.extend((function() {
 
 	Driver.prototype.averageTime = function() {
 		var i,
-			n = this.ranking.averageLapsCount || 4;
+			n = this.ranking.averageLapsCount();
 		sum = 0;
 		for (i = 0; i < this.times.length; i++) {
 			if (n && i >= n) {
