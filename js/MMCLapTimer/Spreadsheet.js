@@ -15,6 +15,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		this.lastModified = null;
 		this.token = token;
 		this.session = options.session || null;
+		this.data = null;
 
 		if (this.token && options.complete) {
 			this.load(options.complete);
@@ -27,47 +28,42 @@ MMCLapTimer.Spreadsheet = (function () {
 
 	Spreadsheet.prototype.load = function(complete) {
 		var that = this;
-		this.getJSON(this.token).done(function(data) {
-			if (typeof complete === 'function') {
-				complete.call(that, that.normalize(data));
-			}
-		});
+		this.getJSON(this.token)
+			.done(function(data) {
+				that.data = that.normalize(data);
+				if (typeof complete === 'function') {
+					complete.call(that, that.data);
+				}
+			})
+			.fail(function() {
+				if (typeof complete === 'function') {
+					complete.call(that);
+				}
+			});
 		return this;
 	}
 
-	Spreadsheet.prototype.reload = function(complete) {
+	Spreadsheet.prototype.reloadIfChanged = function(complete) {
 		var that = this;
-		this.dirtyCheck().done(function(isChanged) {
-			if (isChanged) {
-				that.load(complete);
-			} else if (typeof complete === 'function') {
-				complete.call(that);
-			}
-		});
+		this.dirtyCheck()
+			.done(function(isChanged) {
+				if (isChanged) {
+					that.load(complete);
+				} else if (typeof complete === 'function') {
+					complete.call(that);
+				}
+			})
+			.fail(function() {
+				if (typeof complete === 'function') {
+					complete.call(that);
+				}
+			});
 		return this;
 	}
 
-	//Spreadsheet.prototype.init = function() {
-	//	var _this = this;
-	//
-	//	this.refreshConfig();
-	//
-	//	setInterval(function configInterval() {
-	//		_this.dirtyCheck(_this.configSheetToken).done(function dirtyCheckCb(isChanged) {
-	//			if (isChanged) {
-	//				_this.refreshConfig();
-	//			}
-	//		});
-	//	}, config.refreshTimes.config * config.refreshTimes.results * 1000);
-	//
-	//	setInterval(function dataInterval() {
-	//		_this.dirtyCheck(_this.config.sheetPractice[0], _this.lastModified).done(function dirtyCheckCb(isChanged) {
-	//			if (isChanged) {
-	//				_this.refresh();
-	//			}
-	//		});
-	//	}, config.refreshTimes.results * 1000);
-	//};
+	Spreadsheet.prototype.getData = function(json) {
+		return this.data;
+	}
 
 	Spreadsheet.prototype.normalize = function(json) {
 		return json;
@@ -83,15 +79,18 @@ MMCLapTimer.Spreadsheet = (function () {
 			type: 'HEAD'
 		});
 
-		headersRequest.then(function onSuccess(data, textStatus, request) {
-			if (!_this.lastModified || _this.lastModified < request.getResponseHeader('last-modified')) {
-				dff.resolve(true);
-			} else {
-				dff.resolve(false);
+		headersRequest.then(
+			function onSuccess(data, textStatus, request) {
+				if (!_this.lastModified || _this.lastModified < request.getResponseHeader('last-modified')) {
+					dff.resolve(true);
+				} else {
+					dff.resolve(false);
+				}
+			},
+			function onError(error) {
+				dff.reject(error);
 			}
-		}, function onError(error) {
-			dff.reject(error);
-		});
+		);
 
 		return dff.promise();
 	};
@@ -105,13 +104,16 @@ MMCLapTimer.Spreadsheet = (function () {
 			url: this.url()
 		});
 
-		spreadsheetRequest.then(function(data, textStatus, request) {
-			_this.lastModified = request.getResponseHeader('last-modified');
-			dff.resolve(data.feed.entry);
+		spreadsheetRequest.then(
+			function onSuccess(data, textStatus, request) {
+				_this.lastModified = request.getResponseHeader('last-modified');
+				dff.resolve(data.feed.entry);
 
-		}, function(error) {
-			dff.reject(error);
-		});
+			},
+			function onError(error) {
+				dff.reject(error);
+			}
+		);
 
 		return dff.promise();
 	};
@@ -124,6 +126,7 @@ MMCLapTimer.Spreadsheet = (function () {
 			spreadsheetRequest.abort();
 		}
 		delete this.session;
+		delete this.data;
 	}
 
 	return Spreadsheet;

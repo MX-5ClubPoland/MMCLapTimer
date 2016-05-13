@@ -52,6 +52,10 @@ MMCLapTimer.Session = (function() {
 	}
 
 	Session.prototype.reloadSpreadsheets = function() {
+		var i;
+		for (i = 0; i < this.spreadsheets.length; i++) {
+			this.spreadsheets[i].data = null;
+		}
 		this.reloadSpreadsheetsRecursively(0);
 	}
 
@@ -59,7 +63,7 @@ MMCLapTimer.Session = (function() {
 		var that = this, spreadsheet = this.spreadsheets[s];
 		if (spreadsheet) {
 			//console.log('reload', s);
-			spreadsheet.reload(function(results) {
+			spreadsheet.reloadIfChanged(function(results) {
 				if (results) {
 					//console.log('changed', s);
 					if (!that.newResults) {
