@@ -93,7 +93,7 @@ MMCLapTimer.Ranking = (function() {
 	 */
 	Ranking.prototype.fastestLap = function() {
 		if (this.standings.length) {
-			return this.standings[0].fastestLap();
+			return this.fastestDriver().fastestLap();
 		} else {
 			return null;
 		}
@@ -111,8 +111,15 @@ MMCLapTimer.Ranking = (function() {
 	 * Finds the driver who encounted the best lap.
 	 * @returns {MMCLapTimer.Driver} or null
 	 */
+	Ranking.prototype.bestDriver = function() {
+		if (this.standings.length && this.standings[0].times.length) {
+			return this.standings[0];
+		}
+		return null;
+	}
+
 	Ranking.prototype.fastestDriver = function() {
-		if (this.standings[0].times.length) {
+		if (this.standings.length && this.standings[0].times.length) {
 			return this.standings[0];
 		}
 		return null;
@@ -156,7 +163,6 @@ MMCLapTimer.Ranking = (function() {
 			}
 
 			for (d = 0; d < this.standings.length; d++) {
-				//this.standings[d].container.hide();
 				this.standings[d].container.find('.personalFastest').css({
 					width: this.barWidth(this.standings[d].fastestLap()) + '%'
 				});

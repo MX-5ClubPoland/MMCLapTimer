@@ -52,28 +52,15 @@ MMCLapTimer.Driver = (function() {
 	}
 
 	Driver.prototype.fastestLap = function() {
-		if (this.times.length) {
-		//	return Math.min.apply(Math, this.times);
-			return this.times[0];
-		} else {
-			return null;
-		}
+		return this.times.length ? this.times[0] : null;
 	}
 
 	Driver.prototype.slowestLap = function() {
-		if (this.times.length) {
-			return $(this.times).last()[0];
-		} else {
-			return null;
-		}
+		return this.times.length ? $(this.times).last()[0] : null;
 	}
 
 	Driver.prototype.lastLap = function() {
-		if (this.laps.length) {
-			return $(this.laps).last()[0];
-		} else {
-			return null;
-		}
+		return this.laps.length ? $(this.laps).last()[0] : null;
 	}
 
 	/**
@@ -81,27 +68,20 @@ MMCLapTimer.Driver = (function() {
 	 * @param n
 	 * @returns {Array}
 	 */
-	Driver.prototype.topNTimes = function(n) {
-		return this.times.slice(n - 1);
+	Driver.prototype.topTimes = function(n) {
+		return this.times.slice(0, n);
+	}
+
+	Driver.prototype.averageTimes = function() {
+		return this.topTimes(this.ranking.averageLapsCount());
 	}
 
 	Driver.prototype.draw = function() {
-		var fastestLap = this.fastestLap(),
-			lastLap = this.lastLap();
 		if (!this.container) {
 			this.container = $('<div class="driver">');
 		}
 		this.container.find('.number').text(this.number);
-		if (fastestLap || lastLap) {
-			this.container.find('.nick.bar').remove();
-		}
 		this.container.find('.nick').text(this.nick);
-		this.container.find('.personalFastest.bar')
-			.toggle(!!fastestLap)
-			.find('.time').text(this.formatLaptime(fastestLap));
-		this.container.find('.personalLast.bar')
-			.toggle(!!lastLap)
-			.find('.time').text(this.formatLaptime(lastLap));
 		return this;
 	}
 

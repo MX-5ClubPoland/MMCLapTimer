@@ -7,6 +7,7 @@
  * 	{String} name
  * 	{MMCLapTimer.Trackday} trackday
  * 	{MMCLapTimer.Spreadsheet} spreadsheets
+ * 	rotateLayersDuration
  */
 MMCLapTimer.Session = (function() {
 	var Session = function(options) {
@@ -17,6 +18,7 @@ MMCLapTimer.Session = (function() {
 		this.container = options.container || null;
 		this.name = options.name || '';
 		this.isDrawn = true;
+		this.rotateLayersDuration = options.rotateLayersDuration || config.rotateLayersDuration || 5;
 		if (options.results) {
 			this.load(options.results);
 		}
@@ -134,18 +136,18 @@ MMCLapTimer.Session = (function() {
 		return categorizedResults;
 	}
 
-	Session.prototype.fastestDriver = function() {
-		var i, fastestDriver = null;
+	Session.prototype.bestDriver = function() {
+		var i, bestDriver = null;
 		for (i = 0; i < this.rankings.length; i++) {
-			if (!fastestDriver || fastestDriver.fastestLap() > this.rankings[i].fastestDriver().fastestLap()) {
-				fastestDriver = this.rankings[i].fastestDriver();
+			if (!bestDriver || bestDriver.fastestLap() > this.rankings[i].bestDriver().fastestLap()) {
+				bestDriver = this.rankings[i].bestDriver();
 			}
 		}
-		return fastestDriver;
+		return bestDriver;
 	}
 
 	Session.prototype.fastestLap = function() {
-		return this.fastestDriver().fastestLap();
+		return this.bestDriver().fastestLap();
 	}
 
 	Session.prototype.draw = function() {
@@ -174,14 +176,38 @@ MMCLapTimer.Session = (function() {
 			this.rankings[i].showDriverRecursively(0);
 		}
 		if (i > 0) {
-			this.drawFastestLap();
+			this.drawFastestLaps();
 			this.adjustHeights();
+			this.rotateLayers();
 		}
 		return this;
 	}
 
-	Session.prototype.drawFastestLap = function() {
-		this.fastestDriver().container.find('.personalFastest').addClass('generalFastest');
+	var rotateLayers = function(focus) {
+		var layers = $(this).find('.layer');
+		layers.each(function(i) {
+			$(this).toggle(i === (focus % layers.length));
+		});
+	}
+
+	Session.prototype.rotateLayers = function() {
+		var layerers = [],
+			count = this.container.find('.driver:first .layers:has(.layer:nth-of-type(2))').find('.layer').length;
+		for (i = 0; i < count; i++) {
+			layerers.push(this.container.find('.driver .layers .layer:has(.personalTopLaps .time):nth-of-type(' + (i + 1) + ')'));
+		}
+		if (layerers) {
+			var focus = 0;
+			this.rotateLayersInterval = setInterval(function() {
+				$(layerers).each(function(i) {
+					$(this)[i === focus ? 'fadeOut' : 'fadeIn']();
+				});
+				focus = (focus + 1) % layerers.length;
+			}, this.rotateLayersDuration * 1000);
+		}
+	}
+
+	Session.prototype.drawFastestLaps = function() {
 		return this;
 	}
 
@@ -212,6 +238,7 @@ MMCLapTimer.Session = (function() {
 		this.name = '';
 		this.isDrawn = false;
 		clearTimeout(this.reloadTimeout);
+		clearInterval(this.rotateLayersInterval);
 	}
 
 	return Session;

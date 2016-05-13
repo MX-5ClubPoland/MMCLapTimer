@@ -1,7 +1,7 @@
 .session {
 	font-size: calc(100vh / 50);
 	padding: 0 2% 0 2%;
-	background: #333;
+	background: #000000;
 	overflow: hidden;
 	position: absolute;
 	z-index: 1;
@@ -14,11 +14,8 @@
 		float: left;
 		box-sizing: border-box;
 		min-width: 4.2em;
-		margin-bottom: 0.5em;
+		margin-bottom: 0.2em;
 		overflow: hidden;
-	}
-	.session .ranking:first-child {
-		height: 100%;
 	}
 		.session .ranking .category {
 			line-height: 2em;
@@ -38,14 +35,12 @@
 	height: 1em;
 	overflow: hidden;
 	box-sizing: border-box;
-	padding-right: 2em;
 	white-space: nowrap;
 	/*min-width: 4.2em;*/
 }
 	.driver div {
 		position: relative;
 		box-sizing: border-box;
-		float: left;
 	}
 
 	.driver .position {
@@ -72,31 +67,34 @@
 		letter-spacing: -0.08em;
 	}
 
-	.driver .laps {
+	.driver .layers {
+		height: 100%;
+		margin-left: 1.5em;
+	}
+
+	.driver.practice .layers {
+		margin-right: 2em;
+	}
+
+	.driver .layers .layer {
 		z-index: 1;
 		width: 100%;
-		padding-left: 1.5em;
+		height: 100%;
+		position: absolute;
+		display: none;
 	}
-		.driver .laps .layer {
+	.driver .layers .layer:first-child {
+		display: block;
+	}
+		.driver .layers .layer .laps {
 			position: relative;
 			width: 100%;
+			height: 100%;
 			font-size: 0.6em;
+			box-sizing: border-box;
 		}
 			.driver .laps .bar {
-				position: absolute;
 				min-width: 4.5em;
-			}
-			.driver .laps .bar:first-child {
-				position: relative;
-			}
-			.driver .laps .nick {
-				position: relative;
-				padding-left: 1.2em;
-				z-index: 1;
-				width: 100%;
-			}
-			.driver .laps .personalFastest,
-			.driver .laps .personalAverage {
 				position: absolute;
 				background-color: #233854;
 				width: 80%;
@@ -104,23 +102,20 @@
 				z-index: 3;
 				overflow: hidden;
 			}
-
-			.driver .laps .personalAverage i {
-				opacity: 0.2;
+			.driver .laps .nick {
+				position: absolute;
+				z-index: 1;
+				padding-left: 1.2em;
 			}
-
-			.driver .laps .personalFastest.generalFastest,
-			.driver .laps .personalAverage.generalFastest {
-				background-color: #870079;
+			.driver .laps .nick.bar {
+				width: 100%;
+				background-color: transparent;
+				overflow: hidden;
 			}
-				.driver .laps .personalFastest .nick,
-				.driver .laps .personalAverage .nick {
-					width: auto;
-					z-index: 1;
-					overflow: hidden;
+				.driver .laps .bar .unit {
+					opacity: 0.2;
 				}
-				.driver .laps .personalAverage .time,
-				.driver .laps .personalFastest .time {
+				.driver .laps .bar .time {
 					position: absolute;
 					z-index: 2;
 					right: 0;
@@ -128,26 +123,55 @@
 					padding-left: 0.4em;
 					background-color: #233854;
 				}
-				.driver .laps .personalAverage.generalFastest .time,
-				.driver .laps .personalFastest.generalFastest .time {
-					background-color: #870079;
+				.driver .laps .generalFastest,
+				.driver .laps .bar.generalFastest .time {
+					background-color: #870079 !important;
 				}
-			.driver .laps .personalLast {
+			.driver .laps .bar.personalLast {
 				position: absolute;
 				background-color: #888888;
 				width: 85%;
 				height: 100%;
 				z-index: 1;
+				overflow: visible;
 			}
-				.driver .laps .personalLast .time {
-					text-align: right;
+				.driver .laps .bar.personalLast .time {
 					position: absolute;
+					text-align: right;
 					left: 100%;
 					text-indent: 0.4em;
 					color: #888888;
 					font-size: 0.8em;
+					padding: 0;
+					background-color: transparent;
 				}
+			.driver .laps .personalTopLaps {
+				position: relative;
+				display: table;
+			}
+			.driver .laps .personalTopLaps .time {
+				display: table-cell;
+				padding-left: 0.4em;
+				padding-right: 0.4em;
+				background-color: #233854;
+				box-sizing: border-box;
+				border-left: solid 0.2em #000000;
+				text-align: center;
+				overflow: hidden;
+			}
+			.driver .laps .personalTopLaps .generalFastest.time {
+				background-color: #870079 !important;
+			}
+			.driver .laps .personalTopLaps .time:first-child {
+				border-left: none;
+				padding-left: 1.2em;
+			}
 
+			.driver.qualified .bar,
+			.driver.qualified .laps .personalTopLaps .time,
+			.driver.qualified .laps .personalAverage .time {
+				background-color: #446a00;
+			}
 .templates {
 	display: none;
 }

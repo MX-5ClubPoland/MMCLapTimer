@@ -7,7 +7,7 @@ MMCLapTimer.Driver.Rallysprint = MMCLapTimer.Driver.extend((function() {
 		this.container = options.container || $('.templates .driver.rallysprint').first().clone();
 	}
 
-	Driver.prototype.averageTime = function() {
+	Driver.prototype.timeAverage = function() {
 		var i,
 			n = this.ranking.averageLapsCount();
 		sum = 0;
@@ -21,22 +21,22 @@ MMCLapTimer.Driver.Rallysprint = MMCLapTimer.Driver.extend((function() {
 	}
 
 	Driver.prototype.draw = function() {
-		var averageLap = this.averageTime();
-			//lastLap = this.lastLap();
-		if (!this.container) {
-			this.container = $('<div class="driver">');
-		}
-		this.container.find('.number').text(this.number);
-		if (averageLap/* || lastLap*/) {
+		var i,
+			timesAverage = this.timeAverage(),
+			averageTimes = this.averageTimes();
+		MMCLapTimer.Driver.prototype.draw.call(this);
+		if (timesAverage || averageTimes.length) {
 			this.container.find('.nick.bar').remove();
 		}
-		this.container.find('.nick').text(this.nick);
 		this.container.find('.personalAverage.bar')
-			.toggle(!!averageLap)
-			.find('.time').html('<i>&Phi;</i> ' + this.formatLaptime(averageLap));
-		//this.container.find('.personalLast')
-		//	.toggle(!!lastLap)
-		//	.find('.time').text(this.formatLaptime(lastLap));
+			.toggle(!!timesAverage)
+			.find('.time .seconds').html(this.formatLaptime(timesAverage));
+		for (i = 0; i < averageTimes.length; i++) {
+			this.container.find('.personalTopLaps').append($('<div class="time">').html(averageTimes[i]));
+		}
+		if (averageTimes.length >= this.ranking.averageLapsCount()) {
+			this.container.addClass('qualified');
+		}
 		return this;
 	}
 

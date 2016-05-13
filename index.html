@@ -54,8 +54,9 @@
 		}
 
 		jQuery(function($) {
-//			openSession((new Date() < new Date('14 may 2016, 14:00')) ? 'practice' : 'rallysprint');
-			openSession('rallysprint');
+			openSession((new Date() < new Date('14 may 2016, 14:00')) ? 'practice' : 'rallysprint');
+//			openSession('rallysprint');
+//			openSession('practice');
 		});
 	</script>
 </head>
@@ -107,15 +108,17 @@
 		<div class="driver practice">
 			<div class="position"></div>
 			<div class="number"></div>
-			<div class="laps">
+			<div class="layers">
 				<div class="layer">
-					<div class="nick bar"></div>
-					<div class="personalFastest bar">
-						<div class="nick"></div>
-						<div class="time"></div>
-					</div>
-					<div class="personalLast bar">
-						<div class="time"></div>
+					<div class="laps">
+						<div class="nick bar"></div>
+						<div class="personalFastest bar">
+							<div class="nick"></div>
+							<div class="time"></div>
+						</div>
+						<div class="personalLast bar">
+							<div class="time"></div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -142,16 +145,22 @@
 		<div class="driver rallysprint">
 			<div class="position"></div>
 			<div class="number"></div>
-			<div class="laps">
+			<div class="layers">
 				<div class="layer">
-					<div class="nick bar"></div>
-					<div class="personalAverage bar">
-						<div class="nick"></div>
-						<div class="time"></div>
+					<div class="laps">
+						<div class="nick bar"></div>
+						<div class="personalAverage bar">
+							<div class="nick"></div>
+							<div class="time">
+								<span class="unit">Ø</span>
+								<span class="seconds"></span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="layer">
-					<div class="personalTopLaps bar">
+					<div class="laps">
+						<div class="personalTopLaps"></div>
 					</div>
 				</div>
 			</div>

@@ -23,7 +23,28 @@ MMCLapTimer.Ranking.Rallysprint = MMCLapTimer.Ranking.extend((function() {
 		} else if (!driverB.times.length) {
 			return -1;
 		}
-		return driverA.averageTime(this.averageLapsCount) - driverB.averageTime(this.averageLapsCount);
+		return driverA.timeAverage(this.averageLapsCount) - driverB.timeAverage(this.averageLapsCount);
+	}
+
+	Ranking.prototype.fastestDriver = function() {
+		var driver, lap, fastestDriver = null;
+		for (driver in this.drivers) {
+			lap = this.drivers[driver].fastestLap();
+			if (lap && (!fastestDriver || lap < fastestDriver.fastestLap())) {
+				fastestDriver = this.drivers[driver];
+			}
+		}
+		return fastestDriver;
+	}
+
+	Ranking.prototype.drawFastestLap = function() {
+		var fastestDriver;
+		if (this.standings.length) {
+			if (fastestDriver = this.fastestDriver()) {
+				fastestDriver.container.find('.personalTopLaps .time:first').addClass('generalFastest');
+			}
+		}
+		return this;
 	}
 
 	Ranking.prototype.draw = function() {
@@ -44,13 +65,9 @@ MMCLapTimer.Ranking.Rallysprint = MMCLapTimer.Ranking.extend((function() {
 			}
 
 			for (d = 0; d < this.standings.length; d++) {
-				//this.standings[d].container.hide();
-				this.standings[d].container.find('.personalAverage').css({
-					width: this.barWidth(this.standings[d].averageTime()) + '%'
+				this.standings[d].container.find('.personalAverage, .personalTopLaps').css({
+					width: this.barWidth(this.standings[d].timeAverage()) + '%'
 				});
-				//this.standings[d].container.find('.personalLast').css({
-				//	width: this.barWidth(this.standings[d].lastLap()) + '%'
-				//});
 			}
 		}
 		return this;
