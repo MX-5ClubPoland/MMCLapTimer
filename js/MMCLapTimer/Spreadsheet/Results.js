@@ -16,7 +16,7 @@ MMCLapTimer.Spreadsheet.Results = (function() {
 				if (object['gsx$pomiar' + i] === undefined) {
 					break;
 				}
-				var time = object['gsx$pomiar' + i].$t.trim();
+				var time = object['gsx$pomiar' + i].$t.trim().replace(',', '.');
 
 				if (time.toLowerCase() == 'x') {
 					/* jezeli czas jest rowny x to wstawia null */

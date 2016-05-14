@@ -16,6 +16,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		this.token = token;
 		this.session = options.session || null;
 		this.data = null;
+		this.isDirty = true;
 
 		if (this.token && options.complete) {
 			this.load(options.complete);
@@ -127,6 +128,7 @@ MMCLapTimer.Spreadsheet = (function () {
 		}
 		delete this.session;
 		delete this.data;
+		this.isDirty = true;
 	}
 
 	return Spreadsheet;

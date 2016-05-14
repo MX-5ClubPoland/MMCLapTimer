@@ -54,10 +54,10 @@ MMCLapTimer.Session = (function() {
 	}
 
 	Session.prototype.reloadSpreadsheets = function() {
-		var i;
-		for (i = 0; i < this.spreadsheets.length; i++) {
-			this.spreadsheets[i].data = null;
-		}
+		//var i;
+		//for (i = 0; i < this.spreadsheets.length; i++) {
+		//	this.spreadsheets[i].data = null;
+		//}
 		this.reloadSpreadsheetsRecursively(0);
 	}
 
@@ -67,11 +67,13 @@ MMCLapTimer.Session = (function() {
 			//console.log('reload', s);
 			spreadsheet.reloadIfChanged(function(results) {
 				if (results) {
+					spreadsheet.data = results;
+					that.isDrawn = false;
 					//console.log('changed', s);
-					if (!that.newResults) {
-						that.newResults = [];
-					}
-					that.newResults.push(results);
+					//if (!that.newResults) {
+					//	that.newResults = [];
+					//}
+					//that.newResults.push(results);
 				}
 				that.reloadSpreadsheetsRecursively(s + 1);
 			});
@@ -81,12 +83,24 @@ MMCLapTimer.Session = (function() {
 		}
 	}
 
+	Session.prototype.areSpreadsheetsDirty = function() {
+		var i;
+		if (this.spreadsheets && this.spreadsheets.length) {
+			for (i = 0; i < this.spreadsheets.length; i++) {
+				if (this.spreadsheets[i].isDirty) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	Session.prototype.allSpreadsheetsLoaded = function() {
 		var i, that = this;
-		if (this.newResults) {
+		if (!this.isDrawn) {
 			this.unload();
-			for (i = 0; i < this.newResults.length; i++) {
-				this.appendResults(this.newResults[i]);
+			for (i = 0; i < this.spreadsheets.length; i++) {
+				this.appendResults(this.spreadsheets[i].data);
 			}
 			this.isDrawn = false;
 			delete this.newResults;
