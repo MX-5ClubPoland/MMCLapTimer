@@ -215,7 +215,7 @@ MMCLapTimer.Session = (function() {
 		var rowsCount = Math.max(this.rankings[0].standings.length, this.rankings[1].standings.length + this.rankings[2].standings.length, 12);
 		//this.container.css({fontSize: ($(window).height() * 0.85 / rowsCount) + 'px'});
 		this.container.css({
-			fontSize: 'calc(85vh / ' + rowsCount + ')'
+			fontSize: 'calc(82vh / ' + rowsCount + ')'
 		});
 		$('body').css({
 			minHeight: '500px'

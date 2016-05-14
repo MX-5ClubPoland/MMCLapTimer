@@ -23,7 +23,7 @@ MMCLapTimer.Spreadsheet = (function () {
 	};
 
 	Spreadsheet.prototype.url = function() {
-		return 'https://spreadsheets.google.com/feeds/list/' + this.token + '/od6/public/values?alt=json';
+		return 'https://spreadsheets.google.com/feeds/list/' + this.token + '/1/public/values?alt=json';
 	}
 
 	Spreadsheet.prototype.load = function(complete) {
