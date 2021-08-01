@@ -12,7 +12,6 @@ MMCLapTimer.Ranking = (function() {
 		options = options || {};
 		this.session = options.session || undefined;
 		this.category = options.category || '';
-		this.showDriverRecursivelyTimeout = null;
 		if (options.container) {
 			this.container = options.container;
 		}
@@ -23,7 +22,6 @@ MMCLapTimer.Ranking = (function() {
 
 	Ranking.prototype.unload = function() {
 		var i;
-		clearTimeout(this.showDriverRecursivelyTimeout);
 		if (this.drivers) {
 			for (i in this.drivers) {
 				this.drivers[i].destroy();
@@ -187,14 +185,10 @@ MMCLapTimer.Ranking = (function() {
 		var that = this,
 			driver = this.standings[d];
 		if (driver) {
-			this.showDriverRecursivelyTimeout = setTimeout(function() {
-				driver.container.animate({
-					width: '100%',
-				}, {
-					duration: 300
-				});
-				that.showDriverRecursively(d + 1);
-			}, 20);
+			driver.container.css({
+				width: '100%',
+			});
+			that.showDriverRecursively(d + 1);
 		}
 	}
 

@@ -10,12 +10,12 @@
 }
 
 	.session .ranking {
-		width: 50%;
-		float: left;
 		box-sizing: border-box;
 		min-width: 4.2em;
 		margin-bottom: 0.2em;
 		overflow: hidden;
+		width: 33%;
+		float: left;
 	}
 		.session .ranking .category {
 			line-height: 2em;
@@ -25,6 +25,11 @@
 			white-space: nowrap;
 			overflow: hidden;
 		}
+
+	.session.groups {
+		display: flex;
+		flex-wrap: wrap;
+	}
 
 .driver {
 	width: 100%;
@@ -72,7 +77,8 @@
 		margin-left: 1.5em;
 	}
 
-	.driver.practice .layers {
+	.driver.practice .layers,
+	.driver.spec .layers {
 		margin-right: 2em;
 	}
 
@@ -170,7 +176,7 @@
 			.driver.qualified .bar,
 			.driver.qualified .laps .personalTopLaps .time,
 			.driver.qualified .laps .personalAverage .time {
-				background-color: #446a00;
+				/*background-color: #446a00;*/
 			}
 .templates {
 	display: none;

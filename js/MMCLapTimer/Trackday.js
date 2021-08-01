@@ -27,6 +27,12 @@ MMCLapTimer.Trackday = (function() {
 				return MMCLapTimer.Session.Rallysprint;
 			case 'practice':
 				return MMCLapTimer.Session.Practice;
+			case 'sideclasses':
+				return MMCLapTimer.Session.Sideclasses;
+			case 'groups':
+				return MMCLapTimer.Session.Groups;
+			case 'openclasses':
+				return MMCLapTimer.Session.Openclasses;
 		}
 		return false;
 	}
@@ -77,7 +83,6 @@ MMCLapTimer.Trackday = (function() {
 				session: session
 			}));
 		}
-
 		this.redraw();
 		session.reloadSpreadsheets();
 		//this.sessions[session].observe(10);

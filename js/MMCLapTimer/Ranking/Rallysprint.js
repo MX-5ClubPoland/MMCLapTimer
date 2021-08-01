@@ -66,11 +66,23 @@ MMCLapTimer.Ranking.Rallysprint = MMCLapTimer.Ranking.extend((function() {
 
 			for (d = 0; d < this.standings.length; d++) {
 				this.standings[d].container.find('.personalAverage, .personalTopLaps').css({
-					width: this.barWidth(this.standings[d].timeAverage()) + '%'
+					width: (this.barWidth(this.standings[d].timeAverage()) | 0) + '%'
 				});
 			}
 		}
 		return this;
+	}
+
+	Ranking.prototype.barWidth = function(lap) {
+		var scale;
+		var slowestDriver = this.slowestDriver();
+		if (slowestDriver) {
+			scale = slowestDriver.timeAverage();
+			if (scale && lap) {
+				return (lap / scale) * 100;
+			}
+		}
+		return null;
 	}
 
 	return Ranking;

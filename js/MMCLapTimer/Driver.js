@@ -87,7 +87,7 @@ MMCLapTimer.Driver = (function() {
 
 	Driver.prototype.formatLaptime = function(lap) {
 		lap = lap || 0.0;
-		return String('0000000' + lap.toFixed(2)).slice(-6);
+		return String('0000000' + lap.toFixed(3)).slice(-7);
 	}
 
 	Driver.prototype.addLap = function(position) {

@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>MiniMiataChallenge</title>
+	<title>MiataChallenge</title>
 	<link href="./css/layout.css" rel="stylesheet" type="text/css" />
 	<link href="./css/loader.css" rel="stylesheet" type="text/css" />
 	<link href="./css/typo.css" rel="stylesheet" type="text/css" />
 	<link href="./css/trackday.css" rel="stylesheet" type="text/css" />
 
-	<script src="http://code.jquery.com/jquery.min.js"></script>
+	<script src="./js/jquery/jquery.min.js"></script>
+	<script src="./js/pouchdb/pouchdb.min.js"></script>
 	<script src="./js/classes.js"></script>
 	<script src="./js/config.js"></script>
 	<script src="./js/MMCLapTimer.js"></script>
@@ -16,9 +17,15 @@
 	<script src="./js/MMCLapTimer/Driver.js"></script>
 	<script src="./js/MMCLapTimer/Driver/Practice.js"></script>
 	<script src="./js/MMCLapTimer/Driver/Rallysprint.js"></script>
+	<script src="./js/MMCLapTimer/Driver/Sideclasses.js"></script>
+	<script src="./js/MMCLapTimer/Driver/Openclasses.js"></script>
+	<script src="./js/MMCLapTimer/Driver/Groups.js"></script>
 	<script src="./js/MMCLapTimer/Ranking.js"></script>
 	<script src="./js/MMCLapTimer/Ranking/Practice.js"></script>
 	<script src="./js/MMCLapTimer/Ranking/Rallysprint.js"></script>
+	<script src="./js/MMCLapTimer/Ranking/Sideclasses.js"></script>
+	<script src="./js/MMCLapTimer/Ranking/Groups.js"></script>
+	<script src="./js/MMCLapTimer/ResultsFeed.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet/Config.js"></script>
 	<script src="./js/MMCLapTimer/Spreadsheet/Results.js"></script>
@@ -26,13 +33,19 @@
 	<script src="./js/MMCLapTimer/Session.js"></script>
 	<script src="./js/MMCLapTimer/Session/Practice.js"></script>
 	<script src="./js/MMCLapTimer/Session/Rallysprint.js"></script>
+	<script src="./js/MMCLapTimer/Session/Sideclasses.js"></script>
+	<script src="./js/MMCLapTimer/Session/Openclasses.js"></script>
+	<script src="./js/MMCLapTimer/Session/Groups.js"></script>
 	<script src="./js/MMCLapTimer/Trackday.js"></script>
 
 	<script>
 		function openTrackday(sessionName) {
+			var urlParams = new URLSearchParams(window.location.search);
+			var configToken = urlParams.get('config');
+
 			return new MMCLapTimer.Trackday({
 				container: $('.trackday:first').clone().appendTo('.trackdays'),
-				config: location.search.replace(/\?([^\&\#]*)/, '$1') || config.configSheet,
+				config: configToken || config.configSheet,
 				sessionName: sessionName
 			});
 		}
@@ -54,7 +67,7 @@
 		}
 
 		jQuery(function($) {
-			openSession((new Date() < new Date('14 may 2016, 14:00')) ? 'practice' : 'rallysprint');
+//			openSession((new Date() < new Date('14 may 2016, 14:00')) ? 'practice' : 'rallysprint');
 //			openSession('rallysprint');
 //			openSession('practice');
 		});
@@ -67,16 +80,20 @@
 
 	<div class="centerWH">
 		<div class="sessionSelection">
-			<img src="./images/miniMiataChallengeLogo.png" alt="miniMiataChallenge" />
+			<img src="./images/miataChallengeLogo.png" alt="Miata Challenge" class="logo" />
+			<h2>Runda IV &ndash; Silesia Ring</h2>
 			<p>
-				<a href="#practice" name="practice" onclick="return openSession('practice')">Trening</a>
+				<a href="#rallysprint" name="rallysprint" onclick="return openSession('rallysprint')">Kategorie Miata Challenge</a>
 				<br />
-				<a href="#rallysprint" name="rallysprint" onclick="return openSession('rallysprint')">Rallysprint</a>
+				<a href="#sideclasses" name="sideclasses" onclick="return openSession('sideclasses')">Klasy dodatkowe</a>
+				<br />
+				<a href="#sideclasses" name="groups" onclick="return openSession('groups')">Grupy i sektory</a>
+<!--				<br />-->
+<!--				<a href="#openclasses" name="openclasses" onclick="return openSession('openclasses')">Klasy OPEN</a>-->
 			</p>
 			<img src="./images/mx-5KlubPolskaLogo.png" alt="MX-5 Klub Polska" />
 		</div>
 	</div>
-
 
 	<div id="loadingOverlay">
 		<div id="spinner">
@@ -93,15 +110,19 @@
 		</div>
 
 		<div class="ranking practice category-1">
-			<h2 class="category">Trening: geje</h2>
+			<h2 class="category">NA/NB1.6 + NC1.8 + ND1.5</h2>
 			<div class="standings"></div>
 		</div>
 		<div class="ranking practice category-2">
-			<h2 class="category">Trening: fryzjerzy</h2>
+			<h2 class="category">NA/NB1.8</h2>
 			<div class="standings"></div>
 		</div>
 		<div class="ranking practice category-3">
-			<h2 class="category">Trening: meżczyźni</h2>
+			<h2 class="category">NC/ND2.0</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking practice category-5">
+			<h2 class="category">Turbo</h2>
 			<div class="standings"></div>
 		</div>
 
@@ -129,16 +150,20 @@
 			<a href="#close" class="closeButton" title="Zamknij sesję" onclick="return closeTrackday();">x</a>
 		</div>
 
-		<div class="ranking rallysprint category-1">
-			<h2 class="category">Rallysprint: geje</h2>
+		<div class="ranking rallysprint category-2">
+			<h2 class="category">NA/NB1.8</h2>
 			<div class="standings"></div>
 		</div>
-		<div class="ranking rallysprint category-2">
-			<h2 class="category">Rallysprint: fryzjerzy</h2>
+		<div class="ranking rallysprint category-1">
+			<h2 class="category">NA/NB1.6 + NC1.8 + ND1.5</h2>
 			<div class="standings"></div>
 		</div>
 		<div class="ranking rallysprint category-3">
-			<h2 class="category">Rallysprint: mężczyźni</h2>
+			<h2 class="category">NC/ND2.0</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking rallysprint category-5">
+			<h2 class="category">Turbo</h2>
 			<div class="standings"></div>
 		</div>
 
@@ -165,7 +190,179 @@
 				</div>
 			</div>
 		</div>
-	</div>
 
+
+		<div class="session sideclasses">
+			<a href="#close" class="closeButton" title="Zamknij sesję" onclick="return closeTrackday();">x</a>
+		</div>
+
+		<div class="ranking sideclasses category-spec1">
+			<h2 class="category">SPEC 1</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-spec2">
+			<h2 class="category">SPEC 2</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-street1">
+			<h2 class="category">Street 1</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-street2">
+			<h2 class="category">Street 2</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-rx8">
+			<h2 class="category">RX-8</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-stock">
+			<h2 class="category">Stock</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-women">
+			<h2 class="category">Kobiety</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-extreme">
+			<h2 class="category">Extreme</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking sideclasses category-yt">
+			<h2 class="category">YouTubers</h2>
+			<div class="standings"></div>
+		</div>
+
+		<div class="driver sideclasses">
+			<div class="position"></div>
+			<div class="number"></div>
+			<div class="layers">
+				<div class="layer">
+					<div class="laps">
+						<div class="nick bar"></div>
+						<div class="personalAverage bar">
+							<div class="nick"></div>
+							<div class="time">
+								<span class="unit">Ø</span>
+								<span class="seconds"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layer">
+					<div class="laps">
+						<div class="personalTopLaps"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="session openclasses">
+			<a href="#close" class="closeButton" title="Zamknij sesję" onclick="return closeTrackday();">x</a>
+		</div>
+
+		<div class="ranking openclasses category-open">
+			<h2 class="category">Open</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking openclasses category-open-2wd-250">
+			<h2 class="category">2WD 250</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking openclasses category-open-2wd-250-plus">
+			<h2 class="category">2WD 250+</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking openclasses category-open-awd">
+			<h2 class="category">AWD</h2>
+			<div class="standings"></div>
+		</div>
+
+
+		<div class="session groups">
+			<a href="#close" class="closeButton" title="Zamknij" onclick="return closeTrackday();">x</a>
+		</div>
+
+		<div class="ranking groups category-group1">
+			<h2 class="category">Grupa zielona</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group2">
+			<h2 class="category">Grupa żółta</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group3">
+			<h2 class="category">Grupa czerwona</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group4">
+			<h2 class="category">Grupa niebieska</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group5">
+			<h2 class="category">Grupa czarna</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group6">
+			<h2 class="category">Grupa biała</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group7">
+			<h2 class="category">Grupa pomarańczowa</h2>
+			<div class="standings"></div>
+		</div>
+		<div class="ranking groups category-group8">
+			<h2 class="category">Grupa fioletowa</h2>
+			<div class="standings"></div>
+		</div>
+
+		<div class="driver groups">
+			<div class="position"></div>
+			<div class="number"></div>
+			<div class="layers">
+				<div class="layer">
+					<div class="laps">
+						<div class="nick bar"></div>
+						<div class="personalAverage bar">
+							<div class="nick"></div>
+							<div class="time">
+								<span class="unit">Ø</span>
+								<span class="seconds"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layer">
+					<div class="laps">
+						<div class="personalTopLaps"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="driver openclasses">
+			<div class="position"></div>
+			<div class="number"></div>
+			<div class="layers">
+				<div class="layer">
+					<div class="laps">
+						<div class="nick bar"></div>
+						<div class="personalAverage bar">
+							<div class="nick"></div>
+							<div class="time">
+								<span class="unit">Ø</span>
+								<span class="seconds"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="layer">
+					<div class="laps">
+						<div class="personalTopLaps"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

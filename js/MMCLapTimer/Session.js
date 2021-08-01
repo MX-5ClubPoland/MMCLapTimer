@@ -1,16 +1,18 @@
 /**
  * @constructor
+ * @params {MMCLapTimer.ResultsFeed|null} resultFeed
  * @params {Object} options
  * Options:
  *  {HTMLElement} container
- * 	{Array} results
- * 	{String} name
- * 	{MMCLapTimer.Trackday} trackday
- * 	{MMCLapTimer.Spreadsheet} spreadsheets
- * 	rotateLayersDuration
+ *  {Array} results
+ *  {String} name
+ *  {MMCLapTimer.Trackday} trackday
+ *  {MMCLapTimer.Spreadsheet} spreadsheets
+ *  rotateLayersDuration
  */
 MMCLapTimer.Session = (function() {
 	var Session = function(options) {
+		var that = this;
 		this.rankings = [];
 		this.categories = {};
 		this.trackday = options.trackday;
@@ -18,16 +20,30 @@ MMCLapTimer.Session = (function() {
 		this.container = options.container || null;
 		this.name = options.name || '';
 		this.isDrawn = true;
-		this.rotateLayersDuration = options.rotateLayersDuration || config.rotateLayersDuration || 5;
+		this.rotateLayersDuration = options.rotateLayersDuration || that.trackday.config.rotateLayersDuration || 5;
+		this.resultsFeed = new MMCLapTimer.ResultsFeed(that.trackday.config.resultsLocalDbName, that.trackday.config.resultsRemoteDbUrl, {
+			onUpdate: function() {
+				return that.resultsFeed.reloadResults().then(function() {
+					if (that.resultsFeed.isSynchronized()) {
+						that.isDrawn = false;
+						that.reloadView();
+					}
+				});
+			}
+		});
+
 		if (options.results) {
 			this.load(options.results);
 		}
-	}
+	};
 
 	Session.prototype.rankingClass = MMCLapTimer.Ranking;
 
 	Session.prototype.unload = function() {
 		var ranking, category;
+		if (this.resultsFeed) {
+			this.resultsFeed.stopSync();
+		}
 		for (category in this.categories) {
 			this.categories[category].destroy();
 			delete this.categories[category];
@@ -39,7 +55,7 @@ MMCLapTimer.Session = (function() {
 		}
 		this.rankings = [];
 		return this;
-	}
+	};
 
 	/**
 	 * Replaces all results with a new set.
@@ -51,7 +67,7 @@ MMCLapTimer.Session = (function() {
 		this.unload();
 		this.appendResults(results);
 		return this;
-	}
+	};
 
 	Session.prototype.reloadSpreadsheets = function() {
 		//var i;
@@ -59,7 +75,7 @@ MMCLapTimer.Session = (function() {
 		//	this.spreadsheets[i].data = null;
 		//}
 		this.reloadSpreadsheetsRecursively(0);
-	}
+	};
 
 	Session.prototype.reloadSpreadsheetsRecursively = function(s) {
 		var that = this, spreadsheet = this.spreadsheets[s];
@@ -81,7 +97,7 @@ MMCLapTimer.Session = (function() {
 			//console.log('all reloaded');
 			this.allSpreadsheetsLoaded();
 		}
-	}
+	};
 
 	Session.prototype.areSpreadsheetsDirty = function() {
 		var i;
@@ -93,24 +109,75 @@ MMCLapTimer.Session = (function() {
 			}
 		}
 		return false;
-	}
+	};
 
 	Session.prototype.allSpreadsheetsLoaded = function() {
-		var i, that = this;
+		var that = this;
+		if (this.resultsFeed) {
+			this.resultsFeed.reloadResults().then(function(allResults) {
+				that.reloadView();
+			});
+		}
+	};
+
+	Session.prototype.reloadView = function() {
+		var that = this;
+		var feedDrivers = {};
+		var i;
+		var n;
 		if (!this.isDrawn) {
 			this.unload();
-			for (i = 0; i < this.spreadsheets.length; i++) {
-				this.appendResults(this.spreadsheets[i].data);
+
+			if (this.spreadsheets.length > 0) {
+				this.resultsFeed.results.forEach(function(result) {
+					if (result.hasOwnProperty('driverId')) {
+						var num = result.driverId;
+						var time = result.microtime / 1000000;
+						var inRange = time >= that.trackday.config.minimumLapTime && time <= that.trackday.config.maximumLapTime;
+						if (!feedDrivers.hasOwnProperty(num)) {
+							feedDrivers[num] = {
+								times: []
+							};
+						}
+						// Rejecting invalid and out of range laps:
+						if ((inRange && result.verification !== false) || (!inRange && result.verification === true)) {
+							feedDrivers[num].times.push(time.toString());
+						}
+					}
+				});
+				this.spreadsheets[0].data.forEach(function(driver) {
+					if (feedDrivers.hasOwnProperty(driver.number)) {
+						$.extend(feedDrivers[driver.number], driver, {
+							times: feedDrivers[driver.number].times
+						});
+					} else {
+						return feedDrivers[driver.number];
+					}
+				});
+				for (n in feedDrivers) {
+					if (!feedDrivers[n].hasOwnProperty('number')) {
+						delete feedDrivers[n];
+					}
+				}
+				for (i = 0; i < this.spreadsheets.length; i++) {
+					this.appendResults(this.spreadsheets[i].data);
+				}
+				this.appendResults(Object.values(feedDrivers));
+			}
+			if (this.resultsFeed) {
+				this.resultsFeed.startSync();
 			}
 			this.isDrawn = false;
-			delete this.newResults;
+			// delete this.newResults;
 		}
-		MMCLapTimer.loader.hide();
-		this.draw();
+		if (this.resultsFeed && this.resultsFeed.isSynchronized()) {
+			MMCLapTimer.loader.hide();
+			this.draw();
+		}
 		this.reloadTimeout = setTimeout(function() {
 			that.reloadSpreadsheets();
-		}, config.refreshTimes.results * 1000);
-	}
+		}, that.trackday.config.sheetRefreshInterval * 1000);
+	};
 
 	/**
 	 * Adds new laptimes.
@@ -136,19 +203,23 @@ MMCLapTimer.Session = (function() {
 			return b.standings.length - a.standings.length;
 		});
 		return this;
-	}
+	};
 
 	Session.prototype.categorizedResults = function(results) {
 		var i, categorizedResults = {};
 		for (i = 0; i < results.length; i++) {
-			category = results[i].category.toString();
-			if (!categorizedResults[category]) {
-				categorizedResults[category] = [];
-			}
-			categorizedResults[category].push(results[i]);
+			// if (!results[i].category) {
+			// 	console.log(results[i]);
+			// } else {
+				category = results[i].category.toString();
+				if (!categorizedResults[category]) {
+					categorizedResults[category] = [];
+				}
+				categorizedResults[category].push(results[i]);
+			// }
 		}
 		return categorizedResults;
-	}
+	};
 
 	Session.prototype.bestDriver = function() {
 		var i, bestDriver = null;
@@ -158,11 +229,11 @@ MMCLapTimer.Session = (function() {
 			}
 		}
 		return bestDriver;
-	}
+	};
 
 	Session.prototype.fastestLap = function() {
 		return this.bestDriver().fastestLap();
-	}
+	};
 
 	Session.prototype.draw = function() {
 		if (!this.isDrawn) {
@@ -170,10 +241,9 @@ MMCLapTimer.Session = (function() {
 			this.isDrawn = true;
 		}
 		return this;
-	}
+	};
 
 	Session.prototype.redraw = function() {
-		//console.log('redraw');
 		var i;
 		if (!this.container) {
 			this.container = $('.templates .session.' + this.name).first().clone();
@@ -195,14 +265,14 @@ MMCLapTimer.Session = (function() {
 			this.rotateLayers();
 		}
 		return this;
-	}
+	};
 
 	var rotateLayers = function(focus) {
 		var layers = $(this).find('.layer');
 		layers.each(function(i) {
 			$(this).toggle(i === (focus % layers.length));
 		});
-	}
+	};
 
 	Session.prototype.rotateLayers = function() {
 		var layerers = [],
@@ -219,27 +289,35 @@ MMCLapTimer.Session = (function() {
 				focus = (focus + 1) % layerers.length;
 			}, this.rotateLayersDuration * 1000);
 		}
-	}
+	};
 
 	Session.prototype.drawFastestLaps = function() {
 		return this;
-	}
+	};
+
+	Session.prototype.getRowsCount = function() {
+		return Math.max(this.rankings[3].standings.length, this.rankings[1].standings.length + this.rankings[4].standings.length, 22);
+	};
 
 	Session.prototype.adjustHeights = function() {
-		var rowsCount = Math.max(this.rankings[0].standings.length, this.rankings[1].standings.length + this.rankings[2].standings.length, 12);
 		//this.container.css({fontSize: ($(window).height() * 0.85 / rowsCount) + 'px'});
 		this.container.css({
-			fontSize: 'calc(82vh / ' + rowsCount + ')'
+			// fontSize: (100 / this.getRowsCount() + 0.1) + 'vh'
+			fontSize: (100 / 58) + 'vh'
 		});
 		$('body').css({
 			minHeight: '500px'
 		});
 		return this;
-	}
+	};
 
 	Session.prototype.destroy = function() {
 		var i;
 		this.unload();
+		if (this.resultsFeed) {
+			this.resultsFeed = null;
+			delete this.resultsFeed;
+		}
 		for (i = 0; i < this.spreadsheets.length; i++) {
 			this.spreadsheets[i].destroy();
 			delete this.spreadsheets[i];
@@ -253,7 +331,7 @@ MMCLapTimer.Session = (function() {
 		this.isDrawn = false;
 		clearTimeout(this.reloadTimeout);
 		clearInterval(this.rotateLayersInterval);
-	}
+	};
 
 	return Session;
 })();
